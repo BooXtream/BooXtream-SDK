@@ -1,0 +1,14 @@
+{
+    "name": "icontact/booxtreamclient",
+    "description": "A simple example client for the BooXtream webservice",
+    "require": {
+        "guzzlehttp/guzzle": "~5.0"
+    },
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Kevin de Harde",
+            "email": "kevin@icontact.nl"
+        }
+    ]
+}
