@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Example for usage with distribution platform (xml with downloadlinks)
+ * Example for usage with stored files
  *
  * BooXtreamClient can return:
  * - a succesful response
@@ -25,16 +25,19 @@ $referenceid = '1234567890';
 $customername = 'customer';
 $customeremailaddress = 'customer@example.com';
 $languagecode = 1033; // English
-$epubfile = '/location/to/file.epub';
+
+// The storedfile you wish to use, with or without .epub
+$storedfile = 'filename';
 
 // create a guzzle client with a base_url for the BooXtream service
 $base_url = 'https://service.booxtream.com';
 $guzzle = new Client(['base_url' => $base_url]);
 
 $BooXtream = new BooXtreamClient($guzzle, $username, $apikey);
-$EpubFile = new EpubFile('epubfile', fopen('test.epub', 'r'));
 
-$BooXtream->createRequest('xml', $EpubFile);
+// could also be 'epub' or 'mobi'
+$BooXtream->createRequest('xml');
+$BooXtream->setStoredFile($storedfile);
 
 $options = [
     'referenceid' => $referenceid,

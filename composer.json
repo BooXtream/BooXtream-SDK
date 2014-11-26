@@ -10,5 +10,10 @@
             "name": "Kevin de Harde",
             "email": "kevin@icontact.nl"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "Icontact\\BooXtreamClient\\": "src/"
+        }
+    }
 }

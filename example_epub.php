@@ -1,10 +1,10 @@
 <?php
 
 /*
- * Example for usage with distribution platform (xml with downloadlinks)
+ * Example for usage with direct return of watermarked file
  *
  * BooXtreamClient can return:
- * - a succesful response
+ * - a succesful response containing the file in $response['raw'] and the content-type in $response['content-type']
  * - an error response ($response['Response']['Error'])
  *
  * At the moment it can also throw Exceptions if conditions are not met
@@ -32,9 +32,9 @@ $base_url = 'https://service.booxtream.com';
 $guzzle = new Client(['base_url' => $base_url]);
 
 $BooXtream = new BooXtreamClient($guzzle, $username, $apikey);
-$EpubFile = new EpubFile('epubfile', fopen('test.epub', 'r'));
+$EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
 
-$BooXtream->createRequest('xml', $EpubFile);
+$BooXtream->createRequest('epub', $EpubFile);
 
 $options = [
     'referenceid' => $referenceid,
