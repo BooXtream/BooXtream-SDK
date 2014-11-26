@@ -32,7 +32,7 @@ $base_url = 'https://service.booxtream.com';
 $guzzle = new Client(['base_url' => $base_url]);
 
 $BooXtream = new BooXtreamClient($guzzle, $username, $apikey);
-$EpubFile = new EpubFile('epubfile', fopen('test.epub', 'r'));
+$EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
 
 $BooXtream->createRequest('xml', $EpubFile);
 
