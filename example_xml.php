@@ -40,7 +40,7 @@ $options = [
     'referenceid' => $referenceid,
     'customername' => $customername,
     'customeremailaddress' => $customeremailaddress,
-    'languagecode' => $languagecode;
+    'languagecode' => $languagecode
 ];
 $BooXtream->setOptions($options);
 $response = $BooXtream->send();
