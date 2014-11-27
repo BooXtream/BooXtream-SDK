@@ -28,21 +28,21 @@ $languagecode = 1033; // English
 $epubfile = '/location/to/file.epub';
 
 // create a guzzle client with a base_url for the BooXtream service
-$base_url = 'https://service.booxtream.com';
-$guzzle = new Client(['base_url' => $base_url]);
+$Guzzle = new Client(['base_url' => $base_url]);
 
-$BooXtream = new BooXtreamClient($guzzle, $username, $apikey);
+// create an epubfile for upload
 $EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
 
+// create the BooXtream Client
+$BooXtream = new BooXtreamClient($guzzle, $username, $apikey);
+
+// create a request with the epubfile
 $BooXtream->createRequest('epub', $EpubFile);
 
-$options = [
-    'referenceid' => $referenceid,
-    'customername' => $customername,
-    'customeremailaddress' => $customeremailaddress,
-    'languagecode' => $languagecode
-];
+// set the options
 $BooXtream->setOptions($options);
+
+// and send
 $response = $BooXtream->send();
 
 // returns an array containing the response

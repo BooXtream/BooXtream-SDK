@@ -13,7 +13,6 @@
 require('vendor/autoload.php');
 
 use \Icontact\BooXtreamClient\BooXtreamClient;
-use \Icontact\BooXtreamClient\EpubFile;
 use \GuzzleHttp\Client;
 
 // Your username and apikey
@@ -21,6 +20,7 @@ $username = 'username';
 $apikey = 'apikey';
 
 // some required options
+$base_url = 'https://service.booxtream.com';
 $referenceid = '1234567890';
 $customername = 'customer';
 $customeremailaddress = 'customer@example.com';
@@ -30,22 +30,21 @@ $languagecode = 1033; // English
 $storedfile = 'filename';
 
 // create a guzzle client with a base_url for the BooXtream service
-$base_url = 'https://service.booxtream.com';
 $guzzle = new Client(['base_url' => $base_url]);
 
+// create the BooXtream Client
 $BooXtream = new BooXtreamClient($guzzle, $username, $apikey);
 
-// could also be 'epub' or 'mobi'
+// create a request (could also be epub or mobi)
 $BooXtream->createRequest('xml');
+
+// set the stored file
 $BooXtream->setStoredFile($storedfile);
 
-$options = [
-    'referenceid' => $referenceid,
-    'customername' => $customername,
-    'customeremailaddress' => $customeremailaddress,
-    'languagecode' => $languagecode
-];
+// set the options
 $BooXtream->setOptions($options);
+
+// and send
 $response = $BooXtream->send();
 
 // returns an array containing the response
