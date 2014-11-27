@@ -1,6 +1,7 @@
 {
     "name": "icontact/booxtreamclient",
     "description": "A simple example client for the BooXtream webservice",
+    "homepage": "https://github.com/BooXtream/php-BooXtreamClient/",
     "require": {
         "guzzlehttp/guzzle": "~5.0"
     },
