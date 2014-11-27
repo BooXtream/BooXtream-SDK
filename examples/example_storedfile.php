@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Example for usage with distribution platform (xml with downloadlinks)
+ * Example for usage with stored files
  *
  * BooXtreamClient can return:
  * - a succesful response
@@ -13,15 +13,15 @@
 require('vendor/autoload.php');
 
 use \Icontact\BooXtreamClient\BooXtreamClient;
-use \Icontact\BooXtreamClient\EpubFile;
 use \GuzzleHttp\Client;
 
-// Your username and apikey
+// Your username, apikey and BooXtream base url
 $username = 'username';
 $apikey = 'apikey';
+$base_url = 'https://service.booxtream.com';
 
-// The epubfile you would like to upload
-$epubfile = '/location/to/file.epub';
+// The storedfile you wish to use, with or without .epub
+$storedfile = 'pauw';
 
 // set the options in an array
 $options = [
@@ -36,14 +36,14 @@ $options = [
 // create a guzzle client with a base_url for the BooXtream service
 $Guzzle = new Client(['base_url' => $base_url]);
 
-// create an epubfile for upload
-$EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
-
 // create the BooXtream Client
 $BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
 
-// create a request with the epubfile
-$BooXtream->createRequest('xml', $EpubFile);
+// create a request (could also be epub or mobi)
+$BooXtream->createRequest('xml');
+
+// set the stored file
+$BooXtream->setStoredFile($storedfile);
 
 // set the options
 $BooXtream->setOptions($options);

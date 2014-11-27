@@ -1,10 +1,10 @@
 <?php
 
 /*
- * Example for usage with direct return of watermarked file
+ * Example for usage with distribution platform (xml with downloadlinks)
  *
  * BooXtreamClient can return:
- * - a succesful response containing the file in $response['raw'] and the content-type in $response['content-type']
+ * - a succesful response
  * - an error response ($response['Response']['Error'])
  *
  * At the moment it can also throw Exceptions if conditions are not met
@@ -16,9 +16,10 @@ use \Icontact\BooXtreamClient\BooXtreamClient;
 use \Icontact\BooXtreamClient\EpubFile;
 use \GuzzleHttp\Client;
 
-// Your username and apikey
+// Your username, apikey and BooXtream base url
 $username = 'username';
 $apikey = 'apikey';
+$base_url = 'https://service.booxtream.com';
 
 // The epubfile you would like to upload
 $epubfile = '/location/to/file.epub';
@@ -28,7 +29,9 @@ $options = [
     'referenceid' => '1234567890',
     'customername' => 'customer',
     'customeremailaddress' => 'customer@example.com',
-    'languagecode' => 1033 // 1033 = English
+    'languagecode' => 1033, // 1033 = English
+    'downloadlimit' => 3,
+    'expirydays' => 30
 ];
 
 // create a guzzle client with a base_url for the BooXtream service
@@ -41,7 +44,7 @@ $EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
 $BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
 
 // create a request with the epubfile
-$BooXtream->createRequest('epub', $EpubFile);
+$BooXtream->createRequest('xml', $EpubFile);
 
 // set the options
 $BooXtream->setOptions($options);

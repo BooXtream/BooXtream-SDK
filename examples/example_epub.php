@@ -1,10 +1,10 @@
 <?php
 
 /*
- * Example for usage with stored files
+ * Example for usage with direct return of watermarked file
  *
  * BooXtreamClient can return:
- * - a succesful response
+ * - a succesful response containing the file in $response['raw'] and the content-type in $response['content-type']
  * - an error response ($response['Response']['Error'])
  *
  * At the moment it can also throw Exceptions if conditions are not met
@@ -13,36 +13,36 @@
 require('vendor/autoload.php');
 
 use \Icontact\BooXtreamClient\BooXtreamClient;
+use \Icontact\BooXtreamClient\EpubFile;
 use \GuzzleHttp\Client;
 
-// Your username and apikey
-$username = 'Demo';
-$apikey = 'onzegeheimesleutel123';
+// Your username, apikey and BooXtream base url
+$username = 'username';
+$apikey = 'apikey';
+$base_url = 'https://service.booxtream.com';
 
-// The storedfile you wish to use, with or without .epub
-$storedfile = 'pauw';
+// The epubfile you would like to upload
+$epubfile = '/location/to/file.epub';
 
 // set the options in an array
 $options = [
     'referenceid' => '1234567890',
     'customername' => 'customer',
     'customeremailaddress' => 'customer@example.com',
-    'languagecode' => 1033, // 1033 = English
-    'downloadlimit' => 3,
-    'expirydays' => 30
+    'languagecode' => 1033 // 1033 = English
 ];
 
 // create a guzzle client with a base_url for the BooXtream service
 $Guzzle = new Client(['base_url' => $base_url]);
 
+// create an epubfile for upload
+$EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
+
 // create the BooXtream Client
 $BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
 
-// create a request (could also be epub or mobi)
-$BooXtream->createRequest('xml');
-
-// set the stored file
-$BooXtream->setStoredFile($storedfile);
+// create a request with the epubfile
+$BooXtream->createRequest('epub', $EpubFile);
 
 // set the options
 $BooXtream->setOptions($options);
