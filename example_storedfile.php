@@ -16,25 +16,20 @@ use \Icontact\BooXtreamClient\BooXtreamClient;
 use \GuzzleHttp\Client;
 
 // Your username and apikey
-$username = 'username';
-$apikey = 'apikey';
+$username = 'Demo';
+$apikey = 'onzegeheimesleutel123';
 
 // The storedfile you wish to use, with or without .epub
-$storedfile = 'filename';
-
-// some required options
-$base_url = 'https://service.booxtream.com';
-$referenceid = '1234567890';
-$customername = 'customer';
-$customeremailaddress = 'customer@example.com';
-$languagecode = 1033; // English
+$storedfile = 'pauw';
 
 // set the options in an array
 $options = [
-    'referenceid' => $referenceid,
-    'customername' => $customername,
-    'customeremailaddress' => $customeremailaddress,
-    'languagecode' => $languagecode
+    'referenceid' => '1234567890',
+    'customername' => 'customer',
+    'customeremailaddress' => 'customer@example.com',
+    'languagecode' => 1033, // 1033 = English
+    'downloadlimit' => 3,
+    'expirydays' => 30
 ];
 
 // create a guzzle client with a base_url for the BooXtream service

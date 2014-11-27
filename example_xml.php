@@ -23,19 +23,14 @@ $apikey = 'apikey';
 // The epubfile you would like to upload
 $epubfile = '/location/to/file.epub';
 
-// some required options
-$base_url = 'https://service.booxtream.com';
-$referenceid = '1234567890';
-$customername = 'customer';
-$customeremailaddress = 'customer@example.com';
-$languagecode = 1033; // English
-
 // set the options in an array
 $options = [
-    'referenceid' => $referenceid,
-    'customername' => $customername,
-    'customeremailaddress' => $customeremailaddress,
-    'languagecode' => $languagecode
+    'referenceid' => '1234567890',
+    'customername' => 'customer',
+    'customeremailaddress' => 'customer@example.com',
+    'languagecode' => 1033, // 1033 = English
+    'downloadlimit' => 3,
+    'expirydays' => 30
 ];
 
 // create a guzzle client with a base_url for the BooXtream service
