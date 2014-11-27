@@ -20,13 +20,15 @@ use \GuzzleHttp\Client;
 $username = 'username';
 $apikey = 'apikey';
 
+// The epubfile you would like to upload
+$epubfile = '/location/to/file.epub';
+
 // some required options
 $base_url = 'https://service.booxtream.com';
 $referenceid = '1234567890';
 $customername = 'customer';
 $customeremailaddress = 'customer@example.com';
 $languagecode = 1033; // English
-$epubfile = '/location/to/file.epub';
 
 // set the options in an array
 $options = [
@@ -43,7 +45,7 @@ $Guzzle = new Client(['base_url' => $base_url]);
 $EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
 
 // create the BooXtream Client
-$BooXtream = new BooXtreamClient($guzzle, $username, $apikey);
+$BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
 
 // create a request with the epubfile
 $BooXtream->createRequest('xml', $EpubFile);
