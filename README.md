@@ -85,39 +85,43 @@ And the stored file:
 $BooXtream->setStoredFile('filename');
 ```
 
-=== Options
+### Options
 
 The available options are as follows. Refer to the API Documentation for details:
 
-required:
+#### required:
 - customername (string)
 - customeremailaddress (string)
 - referenceid (string)
 - languagecode (int)
 
-additionaly required if using xml (aka delivery platform):
+#### additionaly required if using xml (aka delivery platform):
 - expirydays (int)
 - downloadlimit (int)
 
-optional:
+#### optional:
 - exlibris (bool), default: false
 - chapterfooter (bool), default: false
 - disclaimer (bool), default: false
 - showdate (bool), default: false
 
-optional if using xml (aka delivery platform):
+#### optional if using xml (aka delivery platform):
 - epub (bool), default: true
 - kf8mobi (bool), default: false
 
-=== Response
-The response is an array that always contains the following three fields:
+### Response
+
+#### The response is an array that always contains the following three fields:
+
 - raw, this contains the raw returned data (epub, mobi or xml)
 - statuscode, the HTTP status code returned by BooXtream (anything other than 200 is an error)
 - reasonphrase, the second part of the HTTP response, e.g.: OK or NOT FOUND.
 
-In the case of a returned epub or mobi there will also be a field called
+#### In the case of a returned epub or mobi there will also be a field called
+
 - content-type, containing the content-type of the returned file
 
-In the case of xml (in the case of an error (remember, anything other than a code 200 is an error) there will also be xml), you will encounter the following fields:
+#### In the case of xml (in the case of an error (remember, anything other than a code 200 is an error) there will also be xml), you will encounter the following fields:
+
 - Request, containing information about the request you made (options, etc)
 - Response, containing either a set of downloadlinks or more information on an error
