@@ -44,8 +44,8 @@ require('vendor/autoload.php');
 use \Icontact\BooXtreamClient\BooXtreamClient;
 use \GuzzleHttp\Client;
 
-// a guzzle client with the booxtream web service url as a base_url
-$Guzzle = new Client(['base_url' => 'https://service.booxtream.com']);
+// a guzzle client
+$Guzzle = new Client();
 
 // create the BooXtream Client, you will need a username and an API key
 $BooXtream = new BooXtreamClient($Guzzle, 'username', 'apikey');
