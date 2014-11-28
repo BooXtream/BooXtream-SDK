@@ -2,15 +2,9 @@
 
 /*
  * Example for usage with stored files
- *
- * BooXtreamClient can return:
- * - a succesful response
- * - an error response ($response['Response']['Error'])
- *
- * At the moment it can also throw Exceptions if conditions are not met
  */
 
-require('vendor/autoload.php');
+require('../vendor/autoload.php');
 
 use \Icontact\BooXtreamClient\BooXtreamClient;
 use \GuzzleHttp\Client;
@@ -18,10 +12,9 @@ use \GuzzleHttp\Client;
 // Your username, apikey and BooXtream base url
 $username = 'username';
 $apikey = 'apikey';
-$base_url = 'https://service.booxtream.com';
 
 // The storedfile you wish to use, with or without .epub
-$storedfile = 'pauw';
+$storedfile = 'filename.epub';
 
 // set the options in an array
 $options = [
@@ -34,7 +27,7 @@ $options = [
 ];
 
 // create a guzzle client with a base_url for the BooXtream service
-$Guzzle = new Client(['base_url' => $base_url]);
+$Guzzle = new Client();
 
 // create the BooXtream Client
 $BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
@@ -49,7 +42,7 @@ $BooXtream->setStoredFile($storedfile);
 $BooXtream->setOptions($options);
 
 // and send
-$response = $BooXtream->send();
+$Response = $BooXtream->send();
 
 // returns an array containing the response
-var_dump($response);
+var_dump($Response);

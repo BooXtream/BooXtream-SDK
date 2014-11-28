@@ -20,7 +20,7 @@ BooXtreamClient is not available in Packagist, but you can specify this reposito
         }
     ],
     "require": {
-        "icontact/booxtreamclient": "~v0.6"
+        "icontact/booxtreamclient": "~v0.7"
     }
 }
 ```
@@ -47,20 +47,19 @@ use \GuzzleHttp\Client;
 // a guzzle client with the booxtream web service url as a base_url
 $Guzzle = new Client(['base_url' => 'https://service.booxtream.com']);
 
-// You will need an epub file here
-$EpubFile = new EpubFile('epubfile', fopen('path/to/your/file.epub, 'r'));
-
 // create the BooXtream Client, you will need a username and an API key
 $BooXtream = new BooXtreamClient($Guzzle, 'username', 'apikey');
 ```
 
 We're now going to create the request, and load it with the EpubFile.
 
-The first parameter can be either 'epub', 'mobi' or 'xml'. In the first two cases a file will be returned by the service, in the case of 'xml' you will receive one or two, depending on your settings, downloadlinks (aka delivery platform).
+The first parameter can be either 'epub', 'mobi' or 'xml'. In the first two cases a file will be returned by the service, in the case of 'xml' you will receive one or two downloadlinks, depending on your settings (aka delivery platform).
 
 ```php
-// create a request with the epubfile
-$BooXtream->createRequest('epub', $EpubFile);
+$BooXtream->createRequest('epub');
+
+// add a file location to the epub file you want to watermark
+$BooXtream->setEpubFile('/path/to/your/file.epub');
 
 // set the options as an array, refer to the documentation for more information on the options
 $BooXtream->setOptions([
@@ -70,10 +69,10 @@ $BooXtream->setOptions([
 ]);
 
 // and send
-$response = $BooXtream->send();
+$Response = $BooXtream->send();
 ```
 
-A request with a stored file is slightly different. Instead of an instance of EpubFile you just need to provide the name of the file (with or without .epub extension).
+A request with a stored file is slightly different. Instead of adding an epubfile you just need to provide the name of the file (with or without .epub extension).
 
 ```php
 $BooXtream->createRequest('epub');
@@ -100,6 +99,8 @@ The available options are as follows. Refer to the API Documentation for details
 - downloadlimit (int)
 
 #### optional:
+- exlibrisfile (string), this should contain the location of a png-file according to the specifications in the API Documentation.
+- exlibrisfont (string), this should contain either 'sans', 'serif' or 'script'
 - exlibris (bool), default: false
 - chapterfooter (bool), default: false
 - disclaimer (bool), default: false
@@ -111,17 +112,16 @@ The available options are as follows. Refer to the API Documentation for details
 
 ### Response
 
-#### The response is an array that always contains the following three fields:
+The BooXtreamClient returns an object of the type of [Guzzle/Http/Message/Response](http://api.guzzlephp.org/class-Guzzle.Http.Message.Response.html)
 
-- raw, this contains the raw returned data (epub, mobi or xml)
-- statuscode, the HTTP status code returned by BooXtream (anything other than 200 is an error)
-- reasonphrase, the second part of the HTTP response, e.g.: OK or NOT FOUND.
+The response always contains a statuscode (```php $Response->getStatusCode(); ```). If the request was successful this will be 200. Any other status code is an error. Check the HTTP Reason (```php $Response->getReasonPhrase(); ```) for more information.
 
-#### In the case of a returned epub or mobi there will also be a field called
+#### Epub/Mobi
+If you requested an epub or mobi file this can be accessed by reading the body (```php $Response->getBody(); ```). The body is a stream, refer to the [PHP Documentation](http://php.net/stream) for more information on how to access it. Furthermore you can access the file's content-type with ```php $Response->getHeader('content-type'); ```.
 
-- content-type, containing the content-type of the returned file
+#### XML or error
+If you requested xml (aka delivery platform) or if an error occurred more information can be found by accessing the body (```php $Response->getBody(); ```). The body is a stream, refer to the [PHP Documentation](http://php.net/stream) for more information on how to access it.
 
-#### In the case of xml (in the case of an error (remember, anything other than a code 200 is an error) there will also be xml), you will encounter the following fields:
-
+The XML looks like this:
 - Request, containing information about the request you made (options, etc)
 - Response, containing either a set of downloadlinks or more information on an error

@@ -2,27 +2,19 @@
 
 /*
  * Example for usage with direct return of watermarked file
- *
- * BooXtreamClient can return:
- * - a succesful response containing the file in $response['raw'] and the content-type in $response['content-type']
- * - an error response ($response['Response']['Error'])
- *
- * At the moment it can also throw Exceptions if conditions are not met
  */
 
-require('vendor/autoload.php');
+require('../vendor/autoload.php');
 
 use \Icontact\BooXtreamClient\BooXtreamClient;
-use \Icontact\BooXtreamClient\EpubFile;
 use \GuzzleHttp\Client;
 
 // Your username, apikey and BooXtream base url
 $username = 'username';
 $apikey = 'apikey';
-$base_url = 'https://service.booxtream.com';
 
 // The epubfile you would like to upload
-$epubfile = '/location/to/file.epub';
+$epubfile = 'assets/test.epub';
 
 // set the options in an array
 $options = [
@@ -33,22 +25,22 @@ $options = [
 ];
 
 // create a guzzle client with a base_url for the BooXtream service
-$Guzzle = new Client(['base_url' => $base_url]);
-
-// create an epubfile for upload
-$EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
+$Guzzle = new Client();
 
 // create the BooXtream Client
 $BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
 
-// create a request with the epubfile
-$BooXtream->createRequest('epub', $EpubFile);
+// create a request
+$BooXtream->createRequest('epub');
+
+// set the epubfile
+$BooXtream->setEpubFile($epubfile);
 
 // set the options
 $BooXtream->setOptions($options);
 
 // and send
-$response = $BooXtream->send();
+$Response = $BooXtream->send();
 
 // returns an array containing the response
-var_dump($response);
+var_dump($Response);

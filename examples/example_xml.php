@@ -1,28 +1,20 @@
 <?php
 
 /*
- * Example for usage with distribution platform (xml with downloadlinks)
- *
- * BooXtreamClient can return:
- * - a succesful response
- * - an error response ($response['Response']['Error'])
- *
- * At the moment it can also throw Exceptions if conditions are not met
+ * Example for usage with distribution platform (xml with downloadlinks) and a custom exlibris
  */
 
-require('vendor/autoload.php');
+require('../vendor/autoload.php');
 
 use \Icontact\BooXtreamClient\BooXtreamClient;
-use \Icontact\BooXtreamClient\EpubFile;
 use \GuzzleHttp\Client;
 
-// Your username, apikey and BooXtream base url
+// Your username and apikey
 $username = 'username';
 $apikey = 'apikey';
-$base_url = 'https://service.booxtream.com';
 
 // The epubfile you would like to upload
-$epubfile = '/location/to/file.epub';
+$epubfile = 'assets/test.epub';
 
 // set the options in an array
 $options = [
@@ -35,22 +27,26 @@ $options = [
 ];
 
 // create a guzzle client with a base_url for the BooXtream service
-$Guzzle = new Client(['base_url' => $base_url]);
-
-// create an epubfile for upload
-$EpubFile = new EpubFile('epubfile', fopen($epubfile, 'r'));
+$Guzzle = new Client();
 
 // create the BooXtream Client
 $BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
 
-// create a request with the epubfile
-$BooXtream->createRequest('xml', $EpubFile);
+// create a request
+$BooXtream->createRequest('xml');
+
+// set the epubfile
+$BooXtream->setEpubFile($epubfile);
+
+// Add a custom exlibris
+$BooXtream->setExlibrisFile('assets/customexlibris.png');
 
 // set the options
 $BooXtream->setOptions($options);
 
 // and send
-$response = $BooXtream->send();
+$Response = $BooXtream->send();
 
 // returns an array containing the response
-var_dump($response);
+var_dump($Response);
+var_dump($Response->getBody()->getContents());

@@ -3,17 +3,16 @@ namespace Icontact\BooXtreamClient;
 
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Message\ResponseInterface;
-use GuzzleHttp\Post\PostBody;
-use GuzzleHttp\Post\PostFileInterface;
-use Icontact\BooXtreamClient\BooXtreamInterface;
+use GuzzleHttp\Post\PostFile;
 use GuzzleHttp\ClientInterface;
 
 /**
  * Class BooXtreamClient
  * Use to connect to and use the BooXtream webservice
  */
+class BooXtreamClient implements BooXtreamClientInterface {
+    const BASE_URL = 'https://service.booxtream.com';
 
-class BooXtreamClient implements BooXtreamInterface {
     private $guzzle;
     private $username;
     private $apikey;
@@ -21,11 +20,12 @@ class BooXtreamClient implements BooXtreamInterface {
     private $options;
     private $epubfile;
     private $storedfile;
+    private $exlibrisfile;
 
     /**
      * @param ClientInterface $guzzle
-     * @param $username
-     * @param $apikey
+     * @param string $username
+     * @param string $apikey
      */
     public function __construct(ClientInterface $guzzle, $username, $apikey) {
         $this->guzzle = $guzzle;
@@ -35,12 +35,10 @@ class BooXtreamClient implements BooXtreamInterface {
         $this->apikey = $apikey;
     }
 
-
     /**
      * @param string $type
-     * @param PostFileInterface $file
      */
-    public function createRequest($type, PostFileInterface $file = NULL) {
+    public function createRequest($type) {
         switch($type) {
             case 'xml':
             case 'epub':
@@ -48,14 +46,46 @@ class BooXtreamClient implements BooXtreamInterface {
                 $this->type = $type;
                 break;
             default:
-                throw new \RuntimeException('invalid type '.$type);
+                throw new \InvalidArgumentException('invalid type '.$type);
         }
-        $this->epubfile = $file;
     }
 
+    /**
+     * @param string $file
+     */
+    public function setEpubFile($file) {
+        if(!is_null($this->epubfile)) {
+            throw new \RuntimeException('storedfile set but also trying to '.__CLASS__);
+        }
+        $this->epubfile = $this->createPostFile('epubfile', $file);
+    }
+
+    /**
+     * @param string $file
+     */
+    public function setExlibrisFile($file) {
+        $this->exlibrisfile = $this->createPostFile('exlibrisfile', $file);
+    }
+
+    /**
+     * @param string $name
+     * @param string $file
+     * @return PostFile
+     */
+    private function createPostFile($name, $file) {
+        if(!file_exists($file)) {
+            throw new \RuntimeException('file '.$file.' not found while setting '.$name);
+        }
+        $PostFile = new PostFile($name,fopen($file,'r'));
+        return $PostFile;
+    }
+
+    /**
+     * @param string $storedfile
+     */
     public function setStoredFile($storedfile) {
         if(!is_null($this->epubfile)) {
-            throw new \RuntimeException('epubfile exists but also trying to setStoredFile');
+            throw new \RuntimeException('epubfile set but also trying to '.__CLASS__);
         }
 
         // remove .epub from storedfile
@@ -65,7 +95,7 @@ class BooXtreamClient implements BooXtreamInterface {
         }
 
         // check if stored file exists
-        $request = $this->guzzle->createRequest('POST', '/storedfiles/' . $storedfile);
+        $request = $this->guzzle->createRequest('POST', self::BASE_URL . '/storedfiles/' . $storedfile);
         $query = $request->getQuery();
         $query->set('exists', null);
         try {
@@ -101,16 +131,19 @@ class BooXtreamClient implements BooXtreamInterface {
     }
 
     /**
-     * @return array
+     * @return ResponseInterface
      */
     public function send() {
+        if(is_null($this->storedfile) && is_null($this->epubfile)) {
+            throw new \RuntimeException('storedfile or epubfile not set');
+        }
         if(is_null($this->options)) {
             throw new \RuntimeException('options not set');
         }
         if(is_null($this->storedfile)) {
-            $action = '/booxtream.' . $this->type;
+            $action = self::BASE_URL . '/booxtream.' . $this->type;
         } else {
-            $action = '/storedfiles/' . $this->storedfile . '.' . $this->type;
+            $action = self::BASE_URL . '/storedfiles/' . $this->storedfile . '.' . $this->type;
         }
 
         $request = $this->guzzle->createRequest('POST', $action);
@@ -121,6 +154,10 @@ class BooXtreamClient implements BooXtreamInterface {
         if(is_null($this->storedfile)) {
             $postBody->addFile($this->epubfile);
         }
+        if(!is_null($this->exlibrisfile)) {
+            $postBody->addFile($this->exlibrisfile);
+        }
+
 
         // force multipart, can't do this with header
         $postBody->forceMultipartUpload(true);
@@ -130,7 +167,7 @@ class BooXtreamClient implements BooXtreamInterface {
         } catch(ClientException $e) {
             $response = $e->getResponse();
         }
-        return $this->parseResponse($response);
+        return $response;
     }
 
     /**
@@ -149,7 +186,6 @@ class BooXtreamClient implements BooXtreamInterface {
             if(!isset($options['languagecode'])) {
                 throw new \InvalidArgumentException('required option languagecode is not set');
             }
-
 
             // check additional required options for XML requests
             if ($this->type === 'xml') {
@@ -172,10 +208,15 @@ class BooXtreamClient implements BooXtreamInterface {
             }
 
             // check optional (but default) options and translate booleans to 1 and 0
-            $options['exlibris'] = $this->checkBool('exlibris', $options['exlibris']);
+            if(is_null($this->exlibrisfile)) {
+                $options['exlibris'] = $this->checkBool('exlibris', $options['exlibris']);
+            } else {
+                // force this, there is no use to setting an exlibrisfile without setting exlibris to true
+                $options['exlibris'] = 1;
+            }
             $options['chapterfooter'] = $this->checkBool('chapterfooter', $options['chapterfooter']);
             $options['disclaimer'] = $this->checkBool('disclaimer', $options['disclaimer']);
-             $options['showdate'] = $this->checkBool('showdate', $options['showdate']);
+            $options['showdate'] = $this->checkBool('showdate', $options['showdate']);
         } catch (\InvalidArgumentException $e) {
             throw $e;
         }
@@ -216,32 +257,5 @@ class BooXtreamClient implements BooXtreamInterface {
         }
 
         return $options;
-    }
-
-    /**
-     * @param ResponseInterface $response
-     * @return array
-     */
-    private function parseResponse(ResponseInterface $response) {
-        $body = $response->getBody();
-        $code = $response->getStatusCode();
-        $reason = $response->getReasonPhrase();
-        $responseArray = [
-            'raw' => $body->getContents(),
-            'statuscode' => $code,
-            'reasonphrase' => $reason
-        ];
-
-
-        if($this->type === 'xml' || $code !== 200) {
-            $responseIterator = new \SimpleXmlIterator($body);
-            foreach ($responseIterator as $name => $child) {
-                $responseArray[$name] = get_object_vars($child);
-            }
-        } else {
-            $responseArray['content-type'] = $response->getHeader('content-type');
-        }
-
-        return $responseArray;
     }
 }
