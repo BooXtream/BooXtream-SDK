@@ -2,8 +2,6 @@
 
 namespace Icontact\BooXtreamClient;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Post\PostFileInterface;
 use GuzzleHttp\Message\ResponseInterface;
 
 /**
@@ -20,32 +18,27 @@ interface BooXtreamClientInterface {
 
     /**
      * @param string $type
-     * @param PostFileInterface $file
      */
     public function createRequest($type);
 
     /**
      * @param string $storedfile
      * @return bool
-     * @throws ClientException
-     * @throws \Exception
      */
     public function setStoredFile($storedfile);
 
     /**
-     * @param array $options
+     * @param $options
      */
     public function setOptions($options);
 
     /**
      * @param $file
-     * @return mixed
      */
     public function setEpubFile($file);
 
     /**
      * @param $file
-     * @return mixed
      */
     public function setExlibrisFile($file);
 
