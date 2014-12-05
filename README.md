@@ -20,7 +20,7 @@ BooXtreamClient is not available in Packagist, but you can specify this reposito
         }
     ],
     "require": {
-        "icontact/booxtreamclient": "~v0.7"
+        "icontact/booxtreamclient": "~0.7"
     }
 }
 ```
