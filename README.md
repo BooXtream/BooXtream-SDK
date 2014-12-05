@@ -16,7 +16,7 @@ BooXtreamClient is not available in Packagist, but you can specify this reposito
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/BooXtream/BooXtreamClient"
+            "url": "https://github.com/BooXtream/php-BooXtreamClient"
         }
     ],
     "require": {
