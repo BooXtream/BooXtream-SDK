@@ -99,7 +99,6 @@ The available options are as follows. Refer to the API Documentation for details
 - downloadlimit (int)
 
 #### optional:
-- exlibrisfile (string), this should contain the location of a png-file according to the specifications in the API Documentation.
 - exlibrisfont (string), this should contain either 'sans', 'serif' or 'script'
 - exlibris (bool), default: false
 - chapterfooter (bool), default: false
@@ -109,6 +108,12 @@ The available options are as follows. Refer to the API Documentation for details
 #### optional if using xml (aka delivery platform):
 - epub (bool), default: true
 - kf8mobi (bool), default: false
+
+#### custom ex libris
+It is also possible to set a custom ex libris file according to the specifications in the API Documentation.
+```php
+$BooXtream->setExlibrisFile('filename');
+```
 
 ### Response
 
