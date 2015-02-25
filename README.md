@@ -9,16 +9,10 @@ A client class in PHP for use with the BooXtream webservice.
 
 ### Installing via Composer
 
-BooXtreamClient is not available in Packagist, but you can specify this repository in your composer.json:
+BooXtreamClient is available in Packagist, just add it to your composer.json
 
 ```javascript
 {
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/BooXtream/php-BooXtreamClient"
-        }
-    ],
     "require": {
         "icontact/booxtreamclient": "~0.7"
     }
