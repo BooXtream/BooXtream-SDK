@@ -4,7 +4,7 @@
  * Example for usage with distribution platform (xml with downloadlinks) and a custom exlibris
  */
 
-require( '../vendor/autoload.php' );
+require '../vendor/autoload.php';
 
 use GuzzleHttp\Client;
 use Icontact\BooXtreamClient\BooXtreamClient;
@@ -21,39 +21,38 @@ $exlibrisfile = 'assets/customexlibris.png';
 
 // set the options in an array
 $options = [
-	'referenceid'          => '1234567890',
-	'customername'         => 'customer',
-	'customeremailaddress' => 'customer@example.com',
-	'languagecode'         => 1033, // 1033 = English
-	'downloadlimit'        => 3,
-	'expirydays'           => 30
+    'referenceid'          => '1234567890',
+    'customername'         => 'customer',
+    'customeremailaddress' => 'customer@example.com',
+    'languagecode'         => 1033, // 1033 = English
+    'downloadlimit'        => 3,
+    'expirydays'           => 30,
 ];
 
 // the type of request, in this case it's a request for a downloadlink embedded in xml
 $type = 'xml';
 
 try {
-	// create a guzzle client
-	$Guzzle = new Client();
+    // create a guzzle client
+    $Guzzle = new Client();
 
-	// create an options object
-	$Options = new Options($options);
+    // create an options object
+    $Options = new Options($options);
 
-	// create the BooXtream Client
-	$BooXtream = new BooXtreamClient($type, $Options, $credentials, $Guzzle);
+    // create the BooXtream Client
+    $BooXtream = new BooXtreamClient($type, $Options, $credentials, $Guzzle);
 
-	// set the epubfile
-	$BooXtream->setEpubFile( $epubfile );
+    // set the epubfile
+    $BooXtream->setEpubFile($epubfile);
 
-	// Add a custom exlibris
-	$BooXtream->setExlibrisFile( $exlibrisfile );
+    // Add a custom exlibris
+    $BooXtream->setExlibrisFile($exlibrisfile);
 
-	// and send
-	$Response = $BooXtream->send();
+    // and send
+    $Response = $BooXtream->send();
 
-	// returns a Response object, containing returned xml
-	var_dump( $Response->getBody()->getContents() );
-
-} catch ( Exception $e ) {
-	var_dump( $e );
+    // returns a Response object, containing returned xml
+    var_dump($Response->getBody()->getContents());
+} catch (Exception $e) {
+    var_dump($e);
 }
