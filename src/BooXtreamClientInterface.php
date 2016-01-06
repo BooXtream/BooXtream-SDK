@@ -12,11 +12,11 @@ use GuzzleHttp\Psr7\Response;
 interface BooXtreamClientInterface {
 	/**
 	 * @param string $type
-	 * @param Options $Options
+	 * @param Options $options
 	 * @param array $authentication
-	 * @param ClientInterface $Guzzle
+	 * @param ClientInterface $guzzle
 	 */
-	public function __construct( $type, Options $Options, array $authentication, ClientInterface $Guzzle );
+	public function __construct( $type, Options $options, array $authentication, ClientInterface $guzzle );
 
 	/**
 	 * @param string $storedfile

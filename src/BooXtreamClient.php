@@ -16,28 +16,28 @@ class BooXtreamClient implements BooXtreamClientInterface {
 	 */
 	private $types = ['xml', 'epub', 'mobi'];
 
-	private $Guzzle;
+	private $guzzle;
 	private $authentication;
 	private $type;
-	private $Options;
+	private $options;
 	private $files;
 	private $storedfiles;
 
 	/**
 	 * @param string $type
-	 * @param Options $Options
+	 * @param Options $options
 	 * @param array $authentication
-	 * @param ClientInterface $Guzzle
+	 * @param ClientInterface $guzzle
 	 */
-	public function __construct( $type, Options $Options, array $authentication, ClientInterface $Guzzle ) {
+	public function __construct( $type, Options $options, array $authentication, ClientInterface $guzzle ) {
 		if(!in_array($type, $this->types)) {
 			throw new \InvalidArgumentException( 'invalid type ' . $type );
 		}
 
-		$this->type = $type;
-		$this->Guzzle = $Guzzle;
-		$this->Options = $Options;
-		$this->Options->parseOptions( $this->type === 'xml' );
+		$this->type    = $type;
+		$this->guzzle  = $guzzle;
+		$this->options = $options;
+		$this->options->parseOptions( $this->type === 'xml' );
 
 		$this->authentication = $authentication;
 		$this->files       = [ ];
@@ -113,7 +113,7 @@ class BooXtreamClient implements BooXtreamClientInterface {
 	private function checkStoredFile( $storedfile ) {
 		try {
 			// check if stored file exists
-			$response = $this->Guzzle->request(
+			$response = $this->guzzle->request(
 				'GET',
 				self::BASE_URL . '/storedfiles/' . $storedfile,
 				[
@@ -151,7 +151,7 @@ class BooXtreamClient implements BooXtreamClientInterface {
 		}
 
 		try {
-			$response = $this->Guzzle->request(
+			$response = $this->guzzle->request(
 				'POST',
 				$action,
 				[
@@ -167,7 +167,7 @@ class BooXtreamClient implements BooXtreamClientInterface {
 	}
 
 	private function createMultipart() {
-		$multipart = $this->Options->getMultipartArray();
+		$multipart = $this->options->getMultipartArray();
 
 		if ( isset ( $this->storedfiles['exlibrisfile'] ) ) {
 			$multipart[] = [
