@@ -1,49 +1,58 @@
 <?php
 
 namespace Icontact\BooXtreamClient;
+
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Message\ResponseInterface;
+use GuzzleHttp\Psr7\Response;
 
 /**
  * Interface BooXtreamInterface
  * Use to connect to and use the BooXtream webservice
  */
 interface BooXtreamClientInterface {
-    /**
-     * @param ClientInterface $guzzle
-     * @param $username
-     * @param $apikey
-     */
-    public function __construct(ClientInterface $guzzle, $username, $apikey);
+	/**
+	 * @param ClientInterface $Guzzle
+	 * @param $username
+	 * @param $apikey
+	 */
+	public function __construct( ClientInterface $Guzzle, $username, $apikey );
 
-    /**
-     * @param string $type
-     */
-    public function createRequest($type);
+	/**
+	 * @param string $type
+	 */
+	public function createRequest( $type );
 
-    /**
-     * @param string $storedfile
-     * @return bool
-     */
-    public function setStoredFile($storedfile);
+	/**
+	 * @param string $storedfile
+	 *
+	 * @return bool
+	 */
+	public function setStoredEpubFile( $storedfile );
 
-    /**
-     * @param $options
-     */
-    public function setOptions($options);
+	/**
+	 * @param string $storedfile
+	 *
+	 * @return bool
+	 */
+	public function setStoredExlibrisFile( $storedfile );
 
-    /**
-     * @param $file
-     */
-    public function setEpubFile($file);
+	/**
+	 * @param $options
+	 */
+	public function setOptions( $options );
 
-    /**
-     * @param $file
-     */
-    public function setExlibrisFile($file);
+	/**
+	 * @param $file
+	 */
+	public function setEpubFile( $file );
 
-    /**
-     * @return ResponseInterface
-     */
-    public function send();
+	/**
+	 * @param $file
+	 */
+	public function setExlibrisFile( $file );
+
+	/**
+	 * @return Response
+	 */
+	public function send();
 } 
