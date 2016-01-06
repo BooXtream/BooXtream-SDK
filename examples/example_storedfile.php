@@ -4,45 +4,54 @@
  * Example for usage with stored files
  */
 
-require('../vendor/autoload.php');
+require( '../vendor/autoload.php' );
 
-use \Icontact\BooXtreamClient\BooXtreamClient;
-use \GuzzleHttp\Client;
+use GuzzleHttp\Client;
+use Icontact\BooXtreamClient\BooXtreamClient;
 
 // Your username, apikey and BooXtream base url
 $username = 'username';
-$apikey = 'apikey';
+$apikey   = 'apikey';
 
 // The storedfile you wish to use, with or without .epub
-$storedfile = 'filename.epub';
+$storedfile         = '9789491833212_preview_edition.epub';
+$storedexlibrisfile = 'exlibris-sample-logo.png';
 
 // set the options in an array
 $options = [
-    'referenceid' => '1234567890',
-    'customername' => 'customer',
-    'customeremailaddress' => 'customer@example.com',
-    'languagecode' => 1033, // 1033 = English
-    'downloadlimit' => 3,
-    'expirydays' => 30
+	'referenceid'          => '1234567890',
+	'customername'         => 'customer',
+	'customeremailaddress' => 'customer@example.com',
+	'languagecode'         => 1033, // 1033 = English
+	'downloadlimit'        => 3,
+	'expirydays'           => 30
 ];
 
-// create a guzzle client with a base_url for the BooXtream service
-$Guzzle = new Client();
+try {
+	// create a guzzle client with a base_url for the BooXtream service
+	$Guzzle = new Client();
 
-// create the BooXtream Client
-$BooXtream = new BooXtreamClient($Guzzle, $username, $apikey);
+	// create the BooXtream Client
+	$BooXtream = new BooXtreamClient( $Guzzle, $username, $apikey );
 
-// create a request (could also be epub or mobi)
-$BooXtream->createRequest('xml');
+	// create a request (could also be epub or mobi)
+	$BooXtream->createRequest( 'xml' );
 
-// set the stored file
-$BooXtream->setStoredFile($storedfile);
+	// set the stored file
+	$BooXtream->setStoredEpubFile( $storedfile );
 
-// set the options
-$BooXtream->setOptions($options);
+	// It's also possible to set a stored exlibris file
+	$BooXtream->setStoredExlibrisFile( $storedexlibrisfile );
 
-// and send
-$Response = $BooXtream->send();
+	// set the options
+	$BooXtream->setOptions( $options );
 
-// returns an array containing the response
-var_dump($Response);
+	// and send
+	$Response = $BooXtream->send();
+
+	// returns a Response object, containing returned xml
+	var_dump( $Response->getBody()->getContents() );
+
+} catch ( Exception $e ) {
+	var_dump( $e );
+}

@@ -14,7 +14,7 @@ BooXtreamClient is available in Packagist, just add it to your composer.json
 ```javascript
 {
     "require": {
-        "icontact/booxtreamclient": "~0.7"
+        "icontact/booxtreamclient": "~0.8"
     }
 }
 ```
@@ -75,7 +75,7 @@ $BooXtream->createRequest('epub');
 And the stored file:
 
 ```php
-$BooXtream->setStoredFile('filename');
+$BooXtream->setStoredEpubFile('filename');
 ```
 
 ### Options
@@ -111,7 +111,7 @@ $BooXtream->setExlibrisFile('filename');
 
 ### Response
 
-The BooXtreamClient returns an object of the type of [Guzzle/Http/Message/Response](http://api.guzzlephp.org/class-Guzzle.Http.Message.Response.html)
+The BooXtreamClient returns an object of the type of [GuzzleHttp\Psr7\Response](http://docs.guzzlephp.org/en/latest/psr7.html#responses)
 
 The response always contains a statuscode (```php $Response->getStatusCode(); ```). If the request was successful this will be 200. Any other status code is an error. Check the HTTP Reason (```php $Response->getReasonPhrase(); ```) for more information.
 
