@@ -8,10 +8,10 @@ require( '../vendor/autoload.php' );
 
 use GuzzleHttp\Client;
 use Icontact\BooXtreamClient\BooXtreamClient;
+use Icontact\BooXtreamClient\Options;
 
-// Your username and apikey
-$username = 'username';
-$apikey   = 'apikey';
+// Your username, apikey and BooXtream base url
+$credentials = ['username', 'apikey'];
 
 // The epubfile you would like to upload
 $epubfile = 'assets/test.epub';
@@ -29,24 +29,24 @@ $options = [
 	'expirydays'           => 30
 ];
 
+// the type of request, in this case it's a request for a downloadlink embedded in xml
+$type = 'xml';
+
 try {
-	// create a guzzle client with a base_url for the BooXtream service
+	// create a guzzle client
 	$Guzzle = new Client();
 
-	// create the BooXtream Client
-	$BooXtream = new BooXtreamClient( $Guzzle, $username, $apikey );
+	// create an options object
+	$Options = new Options($options);
 
-	// create a request
-	$BooXtream->createRequest( 'xml' );
+	// create the BooXtream Client
+	$BooXtream = new BooXtreamClient($type, $Options, $credentials, $Guzzle);
 
 	// set the epubfile
 	$BooXtream->setEpubFile( $epubfile );
 
 	// Add a custom exlibris
 	$BooXtream->setExlibrisFile( $exlibrisfile );
-
-	// set the options
-	$BooXtream->setOptions( $options );
 
 	// and send
 	$Response = $BooXtream->send();

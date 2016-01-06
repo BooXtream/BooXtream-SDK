@@ -11,16 +11,12 @@ use GuzzleHttp\Psr7\Response;
  */
 interface BooXtreamClientInterface {
 	/**
-	 * @param ClientInterface $Guzzle
-	 * @param $username
-	 * @param $apikey
-	 */
-	public function __construct( ClientInterface $Guzzle, $username, $apikey );
-
-	/**
 	 * @param string $type
+	 * @param Options $Options
+	 * @param array $authentication
+	 * @param ClientInterface $Guzzle
 	 */
-	public function createRequest( $type );
+	public function __construct( $type, Options $Options, array $authentication, ClientInterface $Guzzle );
 
 	/**
 	 * @param string $storedfile
@@ -35,11 +31,6 @@ interface BooXtreamClientInterface {
 	 * @return bool
 	 */
 	public function setStoredExlibrisFile( $storedfile );
-
-	/**
-	 * @param $options
-	 */
-	public function setOptions( $options );
 
 	/**
 	 * @param $file

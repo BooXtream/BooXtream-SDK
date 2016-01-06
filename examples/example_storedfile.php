@@ -8,10 +8,10 @@ require( '../vendor/autoload.php' );
 
 use GuzzleHttp\Client;
 use Icontact\BooXtreamClient\BooXtreamClient;
+use Icontact\BooXtreamClient\Options;
 
 // Your username, apikey and BooXtream base url
-$username = 'username';
-$apikey   = 'apikey';
+$credentials = ['username', 'apikey'];
 
 // The storedfile you wish to use, with or without .epub
 $storedfile         = '9789491833212_preview_edition.epub';
@@ -27,24 +27,24 @@ $options = [
 	'expirydays'           => 30
 ];
 
+// the type of request, in this case it's a request for a downloadlink embedded in xml
+$type = 'xml';
+
 try {
-	// create a guzzle client with a base_url for the BooXtream service
+	// create a guzzle client
 	$Guzzle = new Client();
 
-	// create the BooXtream Client
-	$BooXtream = new BooXtreamClient( $Guzzle, $username, $apikey );
+	// create an options object
+	$Options = new Options($options);
 
-	// create a request (could also be epub or mobi)
-	$BooXtream->createRequest( 'xml' );
+	// create the BooXtream Client
+	$BooXtream = new BooXtreamClient($type, $Options, $credentials, $Guzzle);
 
 	// set the stored file
 	$BooXtream->setStoredEpubFile( $storedfile );
 
 	// It's also possible to set a stored exlibris file
 	$BooXtream->setStoredExlibrisFile( $storedexlibrisfile );
-
-	// set the options
-	$BooXtream->setOptions( $options );
 
 	// and send
 	$Response = $BooXtream->send();

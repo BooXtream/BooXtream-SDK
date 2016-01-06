@@ -8,10 +8,10 @@ require( '../vendor/autoload.php' );
 
 use GuzzleHttp\Client;
 use Icontact\BooXtreamClient\BooXtreamClient;
+use Icontact\BooXtreamClient\Options;
 
 // Your username, apikey and BooXtream base url
-$username = 'username';
-$apikey   = 'apikey';
+$credentials = ['username', 'apikey'];
 
 // The epubfile you would like to upload
 $epubfile = 'assets/test.epub';
@@ -24,21 +24,21 @@ $options = [
 	'languagecode'         => 1033 // 1033 = English
 ];
 
+// the type of request, in this case it's a request for a direct download of a watermarked epub
+$type = 'epub';
+
 try {
-	// create a guzzle client with a base_url for the BooXtream service
+	// create a guzzle client
 	$Guzzle = new Client();
 
-	// create the BooXtream Client
-	$BooXtream = new BooXtreamClient( $Guzzle, $username, $apikey );
+	// create an options object
+	$Options = new Options($options);
 
-	// create a request
-	$BooXtream->createRequest( 'epub' );
+	// create the BooXtream Client
+	$BooXtream = new BooXtreamClient($type, $Options, $credentials, $Guzzle);
 
 	// set the epubfile
 	$BooXtream->setEpubFile( $epubfile );
-
-	// set the options
-	$BooXtream->setOptions( $options );
 
 	// and send
 	$Response = $BooXtream->send();
