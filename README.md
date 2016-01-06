@@ -21,7 +21,7 @@ BooXtreamClient is available in Packagist, just add it to your composer.json
 
 Alternatively you can just download the package and run ```composer install``` to get the requirements.
 
-The only requirement at the moment is [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
+The only requirements at the moment are PHP 5.4 and up and [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
 
 If you do not wish to use Composer you will need to fulfill the dependencies on your own.
 

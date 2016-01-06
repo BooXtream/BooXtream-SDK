@@ -1,20 +1,21 @@
 {
-    "name": "icontact/booxtreamclient",
-    "description": "A simple example client for the BooXtream webservice",
-    "homepage": "https://github.com/BooXtream/php-BooXtreamClient/",
-    "require": {
-        "guzzlehttp/guzzle": "^6.1"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Kevin de Harde",
-            "email": "kevin@icontact.nl"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Icontact\\BooXtreamClient\\": "src/"
-        }
+  "name": "icontact/booxtreamclient",
+  "description": "A simple example client for the BooXtream webservice",
+  "homepage": "https://github.com/BooXtream/php-BooXtreamClient/",
+  "require": {
+    "php": ">=5.4.0",
+    "guzzlehttp/guzzle": "^6.1"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Kevin de Harde",
+      "email": "kevin@icontact.nl"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Icontact\\BooXtreamClient\\": "src/"
+    }
+  }
 }

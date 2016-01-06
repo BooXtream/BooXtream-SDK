@@ -11,6 +11,11 @@ use GuzzleHttp\Exception\ClientException;
 class BooXtreamClient implements BooXtreamClientInterface {
 	const BASE_URL = 'https://service.booxtream.com';
 
+	/*
+	 * PHP 5.6 would allow us to define this array as a class constant, maybe later.
+	 */
+	private $types = ['xml', 'epub', 'mobi'];
+
 	private $Guzzle;
 	private $authentication;
 	private $type;
@@ -24,26 +29,19 @@ class BooXtreamClient implements BooXtreamClientInterface {
 	 * @param array $authentication
 	 * @param ClientInterface $Guzzle
 	 */
-	public function __construct( $type, Options $Options, array $authentication, ClientInterface $Guzzle  ) {
-		switch ( $type ) {
-			case 'xml':
-			case 'epub':
-			case 'mobi':
-				$this->type = $type;
-				break;
-			default:
-				throw new \InvalidArgumentException( 'invalid type ' . $type );
+	public function __construct( $type, Options $Options, array $authentication, ClientInterface $Guzzle ) {
+		if(!in_array($type, $this->types)) {
+			throw new \InvalidArgumentException( 'invalid type ' . $type );
 		}
 
-		$this->Guzzle         = $Guzzle;
-
-		$this->Options        = $Options;
+		$this->type = $type;
+		$this->Guzzle = $Guzzle;
+		$this->Options = $Options;
 		$this->Options->parseOptions( $this->type === 'xml' );
 
 		$this->authentication = $authentication;
-
-		$this->files          = [ ];
-		$this->storedfiles    = [ ];
+		$this->files       = [ ];
+		$this->storedfiles = [ ];
 	}
 
 	/**
