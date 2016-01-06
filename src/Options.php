@@ -33,20 +33,17 @@ class Options {
 
 			// Check additional required options for XML requests
 			if ( $xml ) {
-				$this->options = array_replace_recursive (
+				$this->options = array_replace_recursive(
 					[
 						'expirydays'    => 30,
-				         'downloadlimit' => 3,
-				         'epub'          => true,
-				         'kf8mobi'       => false
+						'downloadlimit' => 3,
+						'epub'          => true,
+						'kf8mobi'       => false
 					],
 					$this->options
 				);
 				$this->checkXMLOptions();
 			}
-
-			// Optional stuff
-			$this->checkOptionalOptions();
 
 		} catch ( \InvalidArgumentException $e ) {
 			throw $e;
@@ -56,7 +53,7 @@ class Options {
 	/**
 	 * @return array
 	 */
-	public function getMultipartArray( ) {
+	public function getMultipartArray() {
 		$multipart = [ ];
 		foreach ( $this->options as $name => $contents ) {
 			$multipart[] = [
@@ -64,60 +61,53 @@ class Options {
 				'contents' => (string) $contents
 			];
 		}
+
 		return $multipart;
 	}
 
 	private function checkRequiredOptions() {
-		if(!$this->checkString('customername', false) && !$this->checkString('customeremailaddress', false)) {
+		if ( ! $this->checkString( 'customername' ) && ! $this->checkString( 'customeremailaddress' ) ) {
 			throw new \InvalidArgumentException( 'at least one of customername or customeremailaddress is not set or empty' );
 		}
-		$this->checkString('referenceid');
-		$this->checkString('languagecode');
+		if ( ! $this->checkString( 'referenceid' ) ) {
+			throw new \InvalidArgumentException( 'referenceid is not set or empty' );
+		}
+		if ( ! $this->checkString( 'languagecode' ) ) {
+			throw new \InvalidArgumentException( 'languagecode is not set or empty' );
+		}
 	}
 
 	private function checkXMLOptions() {
-		$this->checkInt('expirydays');
-		$this->checkInt('downloadlimit');
-
-		$this->checkBool( 'epub' );
-		$this->checkBool( 'kf8mobi' );
-	}
-
-	private function checkOptionalOptions() {
-		$this->checkBool( 'exlibris', false );
-		$this->checkBool( 'chapterfooter', false );
-		$this->checkBool( 'disclaimer', false );
-		$this->checkBool( 'showdate', false );
-	}
-
-	private function checkString ( $name, $strict=true ) {
-		if ( ! isset( $this->options[$name] ) || empty( $this->options[$name] )) {
-			if( $strict ) throw new \InvalidArgumentException( $name.' is not set or empty' );
-			return false;
+		if ( ! $this->checkInt( 'expirydays' ) ) {
+			throw new \InvalidArgumentException( 'expirydays is not set or not an integer' );
 		}
-		return true;
+		if ( ! $this->checkInt( 'downloadlimit' ) ) {
+			throw new \InvalidArgumentException( 'downloadlimit is not set or not an integer' );
+		}
+		if ( ! $this->checkBool( 'epub' ) ) {
+			throw new \InvalidArgumentException( 'epub is not set or not a boolean' );
+		}
+		if ( ! $this->checkBool( 'kf8mobi' ) ) {
+			throw new \InvalidArgumentException( 'kf8mobi is not set or not a boolean' );
+		}
+	}
+
+	private function checkString( $name ) {
+		return isset( $this->options[ $name ] ) && ! empty( $this->options[ $name ] );
 	}
 
 	/**
 	 * @param string $name
 	 */
-	private function checkInt ( $name, $strict=true ) {
-		if ( ! isset( $this->options[$name]) || ! is_int ( $this->options[$name] ) ) {
-			if( $strict ) throw new \InvalidArgumentException( $name.' is not set or not an integer' );
-			return false;
-		}
-		return true;
+	private function checkInt( $name ) {
+		return isset( $this->options[ $name ] ) && is_int( $this->options[ $name ] );
 	}
 
 	/**
 	 * @param string $name
 	 */
-	private function checkBool( $name, $strict=true ) {
-		if ( ! isset( $this->options[$name] ) || ! is_bool( $this->options[$name] ) ) {
-			if( $strict ) throw new \InvalidArgumentException( $name . ' is not set or not a boolean' );
-			return false;
-		}
-		return true;
+	private function checkBool( $name ) {
+		return isset( $this->options[ $name ] ) && is_bool( $this->options[ $name ] );
 	}
 
 }
