@@ -120,7 +120,7 @@ class BooXtreamClient implements BooXtreamClientInterface
     /**
      * @param string $storedfile
      *
-     * @return void
+     * @return bool
      */
     public function setStoredEpubFile($storedfile)
     {
@@ -134,12 +134,14 @@ class BooXtreamClient implements BooXtreamClientInterface
             $storedfile = substr($storedfile, 0, $pos);
         }
         $this->storedfiles['epubfile'] = $this->checkStoredFile($storedfile);
+
+        return true;
     }
 
     /**
      * @param string $storedfile
      *
-     * @return void
+     * @return bool
      */
     public function setStoredExlibrisFile($storedfile)
     {
@@ -148,6 +150,8 @@ class BooXtreamClient implements BooXtreamClientInterface
         }
 
         $this->storedfiles['exlibrisfile'] = $this->checkStoredFile($storedfile);
+
+        return true;
     }
 
     /**
@@ -176,7 +180,7 @@ class BooXtreamClient implements BooXtreamClientInterface
             throw new \RuntimeException('unknown error occured while checking storedfile ' . $storedfile);
         } catch (ClientException $e) {
             if ($e->getCode() === 404) {
-                throw new \RuntimeException('storedfile ' . $storedfile . ' does not exist');
+                throw new \InvalidArgumentException('storedfile ' . $storedfile . ' does not exist');
             }
             throw $e;
         }
