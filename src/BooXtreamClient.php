@@ -75,7 +75,7 @@ class BooXtreamClient implements BooXtreamClientInterface
     /**
      * @param string $file
      *
-     * return void
+     * return bool
      */
     public function setEpubFile($file)
     {
@@ -83,16 +83,20 @@ class BooXtreamClient implements BooXtreamClientInterface
             throw new \RuntimeException('storedfile set but also trying to set local file');
         }
         $this->files['epubfile'] = $this->checkFile('epubfile', $file);
+
+        return true;
     }
 
     /**
      * @param string $file
      *
-     * return void
+     * return bool
      */
     public function setExlibrisFile($file)
     {
         $this->files['exlibrisfile'] = $this->checkFile('exlibrisfile', $file);
+
+        return true;
     }
 
     /**
