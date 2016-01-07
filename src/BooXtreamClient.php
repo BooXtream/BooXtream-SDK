@@ -107,7 +107,7 @@ class BooXtreamClient implements BooXtreamClientInterface
     private function checkFile($name, $file)
     {
         if ( ! file_exists($file) || ! is_readable($file)) {
-            throw new \RuntimeException('file ' . $file . ' not found or readable while setting ' . $name);
+            throw new \InvalidArgumentException('file ' . $file . ' not found or readable while setting ' . $name);
         }
 
         return [

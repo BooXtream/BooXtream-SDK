@@ -2,23 +2,43 @@
 
 namespace Icontact\BooXtreamClient\Tests;
 
-use GuzzleHttp\Client;
 use Icontact\BooXtreamClient\BooXtreamClient;
-use Icontact\BooXtreamClient\Options;
 
 class BooXtreamClientTest extends \PHPUnit_Framework_TestCase
 {
-    public function testSetEpubFile()
-    {
-        $guzzle      = new Client();
-        $options     = new Options([
-            'referenceid'  => 12345,
-            'customername' => 'name',
-            'languagecode' => 1033,
-        ]);
-        $credentials = [];
+    protected $basicobject;
 
-        $bx = new BooXtreamClient('epub', $options, $credentials, $guzzle);
-        $this->assertTrue($bx->setEpubFile('./examples/assets/test.epub'));
+    protected function setUp() {
+        $guzzle = $this->getMock('GuzzleHttp\Client');
+        $options = $this->getMockBuilder('Icontact\BooXtreamClient\Options')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+
+        $this->basicobject = new BooXtreamClient('epub', $options, [], $guzzle);
     }
+
+    public function testSetExistingEpubFile()
+    {
+        $this->assertTrue($this->basicobject->setEpubFile('./examples/assets/test.epub'));
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSetNonExistingEpubFile() {
+        $this->basicobject->setEpubFile('../nope');
+    }
+
+    public function testSetExistingExlibrisFile()
+    {
+        $this->assertTrue($this->basicobject->setExlibrisFile('./examples/assets/customexlibris.png'));
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSetNonExistingExlibrisFile() {
+        $this->basicobject->setExlibrisFile('../nope');
+    }
+-
 }
