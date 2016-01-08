@@ -1,7 +1,7 @@
 BooXtreamClient
 ===============
 
-[![Code Climate](https://codeclimate.com/github/BooXtream/BooXtream-SDK/badges/gpa.svg)](https://codeclimate.com/github/BooXtream/BooXtream-SDK)
+[![Code Climate](https://codeclimate.com/github/BooXtream/BooXtream-SDK/badges/gpa.svg)](https://codeclimate.com/github/BooXtream/BooXtream-SDK) [![Test Coverage](https://codeclimate.com/github/BooXtream/BooXtream-SDK/badges/coverage.svg)](https://codeclimate.com/github/BooXtream/BooXtream-SDK/coverage)
 
 A client class in PHP for use with the BooXtream webservice.
 
