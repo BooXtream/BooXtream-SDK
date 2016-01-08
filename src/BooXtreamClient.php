@@ -155,6 +155,33 @@ class BooXtreamClient implements BooXtreamClientInterface
     }
 
     /**
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function send()
+    {
+        if ( ! isset($this->storedfiles['epubfile']) && ! isset($this->files['epubfile'])) {
+            throw new \RuntimeException('storedfile or epubfile not set');
+        }
+
+        $multipart = $this->getMultipart();
+
+        // set action
+        $action = self::BASE_URL . '/booxtream.' . $this->type;
+        if (isset($this->storedfiles['epubfile'])) {
+            $action = self::BASE_URL . '/storedfiles/' . $this->storedfiles['epubfile'] . '.' . $this->type;
+        }
+
+        return $this->guzzle->request(
+            'POST',
+            $action,
+            [
+                'auth'      => $this->authentication,
+                'multipart' => $multipart,
+            ]
+        );
+    }
+
+    /**
      * @param string $storedfile
      *
      * @return string
@@ -176,44 +203,11 @@ class BooXtreamClient implements BooXtreamClientInterface
             if ($response->getStatusCode() === 200) {
                 return $storedfile;
             }
-
-            throw new \RuntimeException('unknown error occured while checking storedfile ' . $storedfile);
         } catch (ClientException $e) {
             if ($e->getCode() === 404) {
                 throw new \InvalidArgumentException('storedfile ' . $storedfile . ' does not exist');
             }
             throw $e;
-        }
-    }
-
-    /**
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function send()
-    {
-        if ( ! isset($this->storedfiles['epubfile']) && ! isset($this->files['epubfile'])) {
-            throw new \RuntimeException('storedfile or epubfile not set');
-        }
-
-        $multipart = $this->getMultipart();
-
-        // set action
-        $action = self::BASE_URL . '/booxtream.' . $this->type;
-        if (isset($this->storedfiles['epubfile'])) {
-            $action = self::BASE_URL . '/storedfiles/' . $this->storedfiles['epubfile'] . '.' . $this->type;
-        }
-
-        try {
-            return $this->guzzle->request(
-                'POST',
-                $action,
-                [
-                    'auth'      => $this->authentication,
-                    'multipart' => $multipart,
-                ]
-            );
-        } catch (ClientException $e) {
-            return $e->getResponse();
         }
     }
 
