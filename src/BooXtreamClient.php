@@ -1,4 +1,5 @@
 <?php
+
 namespace Icontact\BooXtreamClient;
 
 use GuzzleHttp\ClientInterface;
@@ -6,306 +7,234 @@ use GuzzleHttp\Exception\ClientException;
 
 /**
  * Class BooXtreamClient
- * Use to connect to and use the BooXtream webservice
+ * Use to connect to and use the BooXtream webservice.
  */
-class BooXtreamClient implements BooXtreamClientInterface {
-	const BASE_URL = 'https://service.booxtream.com';
+class BooXtreamClient implements BooXtreamClientInterface
+{
+    /**
+     * BooXtream location
+     */
+    const BASE_URL = 'https://service.booxtream.com';
 
-	private $Guzzle;
-	private $authentication;
-	private $type;
-	private $options;
-	private $files;
-	private $storedfiles;
+    /**
+     * @var array
+     *
+     * PHP 5.6 would allow us to define this array as a class constant, maybe later.
+     */
+    private $types = ['xml', 'epub', 'mobi'];
 
-	/**
-	 * @param ClientInterface $Guzzle
-	 * @param string $username
-	 * @param string $apikey
-	 */
-	public function __construct( ClientInterface $Guzzle, $username, $apikey ) {
-		$this->Guzzle         = $Guzzle;
-		$this->authentication = [ $username, $apikey ];
-		$this->files          = [ ];
-		$this->storedfiles    = [ ];
-	}
+    /**
+     * @var ClientInterface
+     */
+    private $guzzle;
+    /**
+     * @var array
+     */
+    private $authentication;
+    /**
+     * @var string
+     */
+    private $type;
+    /**
+     * @var Options
+     */
+    private $options;
+    /**
+     * @var array
+     */
+    private $files;
+    /**
+     * @var array
+     */
+    private $storedfiles;
 
-	/**
-	 * @param string $type
-	 */
-	public function createRequest( $type ) {
-		switch ( $type ) {
-			case 'xml':
-			case 'epub':
-			case 'mobi':
-				$this->type = $type;
-				break;
-			default:
-				throw new \InvalidArgumentException( 'invalid type ' . $type );
-		}
-	}
+    /**
+     * @param string $type
+     * @param Options $options
+     * @param array $authentication
+     * @param ClientInterface $guzzle
+     *
+     * return void
+     */
+    public function __construct($type, Options $options, array $authentication, ClientInterface $guzzle)
+    {
+        if ( ! in_array($type, $this->types)) {
+            throw new \InvalidArgumentException('invalid type ' . $type);
+        }
 
-	/**
-	 * @param string $file
-	 */
-	public function setEpubFile( $file ) {
-		if ( isset ( $this->storedfiles['epubfile'] ) ) {
-			throw new \RuntimeException( 'storedfile set but also trying to set local file' );
-		}
-		$this->files['epubfile'] = $this->checkFile( 'epubfile', $file );
-	}
+        $this->type    = $type;
+        $this->guzzle  = $guzzle;
+        $this->options = $options;
+        $this->options->parseOptions($this->type === 'xml');
 
-	/**
-	 * @param string $file
-	 */
-	public function setExlibrisFile( $file ) {
-		$this->files['exlibrisfile'] = $this->checkFile( 'exlibrisfile', $file );
-	}
+        $this->authentication = $authentication;
+        $this->files          = [];
+        $this->storedfiles    = [];
+    }
 
-	/**
-	 * @param string $file
-	 *
-	 * @return array
-	 */
-	private function checkFile( $name, $file ) {
-		if ( ! file_exists( $file ) || ! is_readable( $file ) ) {
-			throw new \RuntimeException( 'file ' . $file . ' not found or readable while setting ' . $name );
-		}
+    /**
+     * @param string $file
+     *
+     * return bool
+     */
+    public function setEpubFile($file)
+    {
+        if (isset($this->storedfiles['epubfile'])) {
+            throw new \RuntimeException('stored epubfile set but also trying to set local epubfile');
+        }
+        $this->files['epubfile'] = $this->checkFile('epubfile', $file);
 
-		return [
-			'name'     => $name,
-			'filename' => basename( $file ),
-			'contents' => fopen( $file, 'r' )
-		];
-	}
+        return true;
+    }
 
-	/**
-	 * @param string $storedfile
-	 * @deprecated
-	 */
-	public function setStoredFile( $storedfile ) {
-		trigger_error('setStoredFile has been deprecated in favor of setStoredEpubFile, please change your code.', E_USER_NOTICE);
-		$this->setStoredEpubFile( $storedfile );
-	}
+    /**
+     * @param string $file
+     *
+     * return bool
+     */
+    public function setExlibrisFile($file)
+    {
+        if (isset($this->storedfiles['exlibrisfile'])) {
+            throw new \RuntimeException('stored exlibrisfile set but also trying to set local exlibrisfile');
+        }
+        $this->files['exlibrisfile'] = $this->checkFile('exlibrisfile', $file);
 
-	/**
-	 * @param string $storedfile
-	 */
-	public function setStoredEpubFile( $storedfile ) {
-		if ( isset( $this->files['epubfile'] ) ) {
-			throw new \RuntimeException( 'epubfile set but also trying to set storedfile' );
-		}
+        return true;
+    }
 
-		// remove epub extension
-		$pos = strrpos( strtolower( $storedfile ), '.epub' );
-		if ( $pos ) {
-			$storedfile = substr( $storedfile, 0, $pos );
-		}
-		$this->storedfiles['epubfile'] = $this->checkStoredFile( $storedfile );
-	}
+    /**
+     * @param string $file
+     *
+     * @return array
+     */
+    private function checkFile($name, $file)
+    {
+        if ( ! file_exists($file) || ! is_readable($file)) {
+            throw new \InvalidArgumentException('file ' . $file . ' not found or readable while setting ' . $name);
+        }
 
-	/**
-	 * @param string $storedfile
-	 */
-	public function setStoredExlibrisFile( $storedfile ) {
-		if ( isset( $this->files['exlibrisfile'] ) ) {
-			throw new \RuntimeException( 'exlibrisfile set but also trying to set storedfile' );
-		}
+        return [
+            'name'     => $name,
+            'filename' => basename($file),
+            'contents' => fopen($file, 'r'),
+        ];
+    }
 
-		$this->storedfiles['exlibrisfile'] = $this->checkStoredFile( $storedfile );
-	}
+    /**
+     * @param string $storedfile
+     *
+     * @return bool
+     */
+    public function setStoredEpubFile($storedfile)
+    {
+        if (isset($this->files['epubfile'])) {
+            throw new \RuntimeException('epubfile set but also trying to set storedfile');
+        }
 
-	/**
-	 * @param string $storedfile
-	 *
-	 * @return string
-	 */
-	private function checkStoredFile( $storedfile ) {
-		try {
-			// check if stored file exists
-			$response = $this->Guzzle->request(
-				'GET',
-				self::BASE_URL . '/storedfiles/' . $storedfile,
-				[
-					'auth'  => $this->authentication,
-					'query' => [
-						'exists' => ''
-					]
-				]
-			);
-			if ( $response->getStatusCode() === 200 ) {
-				return $storedfile;
-			} else {
-				throw new \RuntimeException( 'unknown error occured while checking storedfile ' . $storedfile );
-			}
-		} catch ( ClientException $e ) {
-			if ( $e->getCode() === 404 ) {
-				throw new \RuntimeException( 'storedfile ' . $storedfile . ' does not exist' );
-			}
-			throw $e;
-		}
-	}
+        // remove epub extension
+        $pos = strrpos(strtolower($storedfile), '.epub');
+        if ($pos) {
+            $storedfile = substr($storedfile, 0, $pos);
+        }
+        $this->storedfiles['epubfile'] = $this->checkStoredFile($storedfile);
 
-	/**
-	 * @param array $options
-	 */
-	public function setOptions( $options ) {
-		if ( ! is_array( $options ) ) {
-			throw new \InvalidArgumentException( 'options expects an array' );
-		}
-		$options       = array_replace_recursive( $this->getDefaultOptions(), $options );
-		$this->options = $this->parseOptions( $options );
-	}
+        return true;
+    }
 
-	public function send() {
-		if ( ! isset( $this->storedfiles['epubfile'] ) && ! isset( $this->files['epubfile'] ) ) {
-			throw new \RuntimeException( 'storedfile or epubfile not set' );
-		}
-		if ( is_null( $this->options ) ) {
-			throw new \RuntimeException( 'options not set' );
-		}
+    /**
+     * @param string $storedfile
+     *
+     * @return bool
+     */
+    public function setStoredExlibrisFile($storedfile)
+    {
+        if (isset($this->files['exlibrisfile'])) {
+            throw new \RuntimeException('exlibrisfile set but also trying to set storedfile');
+        }
 
-		$multipart = $this->createMultipart();
+        $this->storedfiles['exlibrisfile'] = $this->checkStoredFile($storedfile);
 
-		// set action
-		$action = self::BASE_URL . '/booxtream.' . $this->type;
-		if ( isset( $this->storedfiles['epubfile'] ) ) {
-			$action = self::BASE_URL . '/storedfiles/' . $this->storedfiles['epubfile'] . '.' . $this->type;
-		}
+        return true;
+    }
 
-		try {
-			$response = $this->Guzzle->request(
-				'POST',
-				$action,
-				[
-					'auth'      => $this->authentication,
-					'multipart' => $multipart
-				]
-			);
-		} catch ( ClientException $e ) {
-			$response = $e->getResponse();
-		}
+    /**
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function send()
+    {
+        if ( ! isset($this->storedfiles['epubfile']) && ! isset($this->files['epubfile'])) {
+            throw new \RuntimeException('storedfile or epubfile not set');
+        }
 
-		return $response;
-	}
+        $multipart = $this->getMultipart();
 
-	private function createMultipart() {
-		$multipart = [ ];
+        // set action
+        $action = self::BASE_URL . '/booxtream.' . $this->type;
+        if (isset($this->storedfiles['epubfile'])) {
+            $action = self::BASE_URL . '/storedfiles/' . $this->storedfiles['epubfile'] . '.' . $this->type;
+        }
 
-		foreach ( $this->options as $name => $contents ) {
-			$multipart[] = [
-				'name'     => $name,
-				'contents' => (string) $contents
-			];
-		}
+        return $this->guzzle->request(
+            'POST',
+            $action,
+            [
+                'auth'      => $this->authentication,
+                'multipart' => $multipart,
+            ]
+        );
 
-		if ( isset ( $this->storedfiles['exlibrisfile'] ) ) {
-			$multipart[] = [
-				'name'     => 'exlibrisfile',
-				'contents' => $this->storedfiles['exlibrisfile']
-			];
-		}
+    }
 
-		if ( isset( $this->files['epubfile'] ) ) {
-			$multipart[] = $this->files['epubfile'];
-		}
+    /**
+     * @param string $storedfile
+     *
+     * @return string
+     */
+    private function checkStoredFile($storedfile)
+    {
+        try {
+            // check if stored file exists
+            $this->guzzle->request(
+                'GET',
+                self::BASE_URL . '/storedfiles/' . $storedfile,
+                [
+                    'auth'  => $this->authentication,
+                    'query' => [
+                        'exists' => '',
+                    ],
+                ]
+            );
+        } catch (ClientException $e) {
+            if ($e->getCode() === 404) {
+                throw new \InvalidArgumentException('storedfile ' . $storedfile . ' does not exist');
+            }
+            throw $e;
+        }
+        return $storedfile;
+    }
 
-		if ( isset( $this->files['exlibrisfile'] ) ) {
-			$multipart[] = $this->files['exlibrisfile'];
-		}
+    /**
+     * @return array
+     */
+    private function getMultipart()
+    {
+        $multipart = $this->options->getMultipartArray();
 
-		return $multipart;
-	}
+        if (isset($this->storedfiles['exlibrisfile'])) {
+            $multipart[] = [
+                'name'     => 'exlibrisfile',
+                'contents' => $this->storedfiles['exlibrisfile'],
+            ];
+        }
 
-	/**
-	 * @param array $options
-	 *
-	 * @return array
-	 */
-	private function parseOptions( $options ) {
-		try {
-			// check required options
-			if ( ! isset( $options['customername'] ) && ! isset( $options['customeremailaddress'] ) ) {
-				throw new \InvalidArgumentException( 'required option customername or customeremailadress is not set' );
-			}
-			if ( ! isset( $options['referenceid'] ) ) {
-				throw new \InvalidArgumentException( 'required option referenceid is not set' );
-			}
-			if ( ! isset( $options['languagecode'] ) ) {
-				throw new \InvalidArgumentException( 'required option languagecode is not set' );
-			}
+        if (isset($this->files['epubfile'])) {
+            $multipart[] = $this->files['epubfile'];
+        }
 
-			// check additional required options for XML requests
-			if ( $this->type === 'xml' ) {
-				if ( ! isset( $options['expirydays'] ) || ! is_int( $options['expirydays'] ) ) {
-					throw new \InvalidArgumentException( 'expirydays is not set' );
-				}
-				if ( ! isset( $options['downloadlimit'] ) || ! is_int( $options['downloadlimit'] ) ) {
-					throw new \InvalidArgumentException( 'downloadlimit is not set' );
-				}
-				if ( ! isset( $options['epub'] ) ) {
-					throw new \InvalidArgumentException( 'epub is not set' );
-				}
-				if ( ! isset( $options['kf8mobi'] ) ) {
-					throw new \InvalidArgumentException( 'kf8mobi is not set' );
-				}
+        if (isset($this->files['exlibrisfile'])) {
+            $multipart[] = $this->files['exlibrisfile'];
+        }
 
-				// check options and translate booleans to 1 and 0
-				$options['epub']    = $this->checkBool( 'epub', $options['epub'] );
-				$options['kf8mobi'] = $this->checkBool( 'kf8mobi', $options['kf8mobi'] );
-			}
-
-			// check optional (but default) options and translate booleans to 1 and 0
-			if ( ! isset ( $this->files['exlibrisfile'] ) && ! isset ( $this->storedfiles['exlibrisfile'] ) ) {
-				$options['exlibris'] = $this->checkBool( 'exlibris', $options['exlibris'] );
-			} else {
-				// force this, there is no use to setting an exlibrisfile without setting exlibris to true
-				$options['exlibris'] = 1;
-			}
-			$options['chapterfooter'] = $this->checkBool( 'chapterfooter', $options['chapterfooter'] );
-			$options['disclaimer']    = $this->checkBool( 'disclaimer', $options['disclaimer'] );
-			$options['showdate']      = $this->checkBool( 'showdate', $options['showdate'] );
-
-			return $options;
-		} catch ( \InvalidArgumentException $e ) {
-			throw $e;
-		}
-	}
-
-	/**
-	 * @param string $name
-	 * @param mixed $value
-	 *
-	 * @return int
-	 */
-	private function checkBool( $name, $value ) {
-		if ( ! is_bool( $value ) ) {
-			throw new \InvalidArgumentException( $name . ' is set incorrectly' );
-		}
-
-		return $value ? 1 : 0;
-	}
-
-	/**
-	 * @return array
-	 */
-	private function getDefaultOptions() {
-		$options = [
-			'exlibris'      => false,
-			'chapterfooter' => false,
-			'disclaimer'    => false,
-			'showdate'      => false
-		];
-
-		if ( $this->type === 'xml' ) {
-			$options = array_merge( $options, [
-				'expirydays'    => 30,
-				'downloadlimit' => 3,
-				'epub'          => true,
-				'kf8mobi'       => false
-			] );
-		}
-
-		return $options;
-	}
+        return $multipart;
+    }
 }

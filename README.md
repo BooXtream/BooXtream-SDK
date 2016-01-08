@@ -1,6 +1,8 @@
 BooXtreamClient
 ===============
 
+[![Code Climate](https://codeclimate.com/github/BooXtream/BooXtream-SDK/badges/gpa.svg)](https://codeclimate.com/github/BooXtream/BooXtream-SDK)
+
 A client class in PHP for use with the BooXtream webservice.
 
 - Has the ability to upload an epub file to the BooXtream webservice
@@ -14,14 +16,14 @@ BooXtreamClient is available in Packagist, just add it to your composer.json
 ```javascript
 {
     "require": {
-        "icontact/booxtreamclient": "~0.8"
+        "icontact/booxtreamclient": "~1.0"
     }
 }
 ```
 
 Alternatively you can just download the package and run ```composer install``` to get the requirements.
 
-The only requirement at the moment is [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
+The only requirements at the moment are PHP 5.4 and up and [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
 
 If you do not wish to use Composer you will need to fulfill the dependencies on your own.
 
