@@ -80,7 +80,7 @@ class BooXtreamClient implements BooXtreamClientInterface
     public function setEpubFile($file)
     {
         if (isset($this->storedfiles['epubfile'])) {
-            throw new \RuntimeException('storedfile set but also trying to set local file');
+            throw new \RuntimeException('stored epubfile set but also trying to set local epubfile');
         }
         $this->files['epubfile'] = $this->checkFile('epubfile', $file);
 
@@ -94,6 +94,9 @@ class BooXtreamClient implements BooXtreamClientInterface
      */
     public function setExlibrisFile($file)
     {
+        if (isset($this->storedfiles['exlibrisfile'])) {
+            throw new \RuntimeException('stored exlibrisfile set but also trying to set local exlibrisfile');
+        }
         $this->files['exlibrisfile'] = $this->checkFile('exlibrisfile', $file);
 
         return true;
@@ -179,6 +182,7 @@ class BooXtreamClient implements BooXtreamClientInterface
                 'multipart' => $multipart,
             ]
         );
+
     }
 
     /**
@@ -190,7 +194,7 @@ class BooXtreamClient implements BooXtreamClientInterface
     {
         try {
             // check if stored file exists
-            $response = $this->guzzle->request(
+            $this->guzzle->request(
                 'GET',
                 self::BASE_URL . '/storedfiles/' . $storedfile,
                 [
@@ -200,15 +204,13 @@ class BooXtreamClient implements BooXtreamClientInterface
                     ],
                 ]
             );
-            if ($response->getStatusCode() === 200) {
-                return $storedfile;
-            }
         } catch (ClientException $e) {
             if ($e->getCode() === 404) {
                 throw new \InvalidArgumentException('storedfile ' . $storedfile . ' does not exist');
             }
             throw $e;
         }
+        return $storedfile;
     }
 
     /**

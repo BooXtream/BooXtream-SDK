@@ -30,14 +30,13 @@ class Options
      */
     public function __construct(array $options)
     {
-        if ( ! is_array($options)) {
-            throw new \InvalidArgumentException('options expects an array');
-        }
         $this->options = array_replace_recursive($this->defaultoptions, $options);
     }
 
     /**
      * @param $xml
+     *
+     * @return bool
      */
     public function parseOptions($xml)
     {
@@ -45,7 +44,7 @@ class Options
             // Required stuff
             $this->checkRequiredOptions();
 
-            // Check additional required options for XML requests
+            // Check additional options for XML requests
             if ($xml) {
                 $this->options = array_replace_recursive(
                     [
@@ -61,6 +60,7 @@ class Options
         } catch (\InvalidArgumentException $e) {
             throw $e;
         }
+        return true;
     }
 
     /**
