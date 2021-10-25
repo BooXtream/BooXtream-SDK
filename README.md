@@ -1,8 +1,6 @@
 BooXtreamClient
 ===============
 
-[![Code Climate](https://codeclimate.com/github/BooXtream/BooXtream-SDK/badges/gpa.svg)](https://codeclimate.com/github/BooXtream/BooXtream-SDK) [![Test Coverage](https://codeclimate.com/github/BooXtream/BooXtream-SDK/badges/coverage.svg)](https://codeclimate.com/github/BooXtream/BooXtream-SDK/coverage)
-
 A client class in PHP for use with the BooXtream webservice.
 
 - Has the ability to upload an epub file to the BooXtream webservice
@@ -23,7 +21,7 @@ BooXtreamClient is available in Packagist, just add it to your composer.json
 
 Alternatively you can just download the package and run ```composer install``` to get the requirements.
 
-The only requirements at the moment are PHP 5.4 and up and [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
+The only requirements at the moment are PHP 7.2.5 and up and [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
 
 If you do not wish to use Composer you will need to fulfill the dependencies on your own.
 
@@ -108,7 +106,7 @@ $BooXtream->setExlibrisFile('filename');
 
 ### Response
 
-The BooXtreamClient returns an object of the type of [GuzzleHttp\Psr7\Response](http://docs.guzzlephp.org/en/latest/psr7.html#responses)
+The BooXtreamClient returns an object of the type of [GuzzleHttp\Psr7\Response](https://docs.guzzlephp.org/en/latest/index.html)
 
 The response always contains a statuscode (```$Response->getStatusCode();```). If the request was successful this will be 200. Any other status code is an error and will throw an Exception of the type of *GuzzleHttp\Exception\ClientException*. You can retrieve a Response object as follows:
 ```php
