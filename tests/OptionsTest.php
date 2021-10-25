@@ -4,8 +4,9 @@ namespace Icontact\BooXtreamClient\Tests;
 
 
 use Icontact\BooXtreamClient\Options;
+use PHPUnit\Framework\TestCase;
 
-class OptionsTest extends \PHPUnit_Framework_TestCase
+class OptionsTest extends TestCase
 {
     protected $validoptions = [
         'referenceid'          => 'str',
@@ -33,11 +34,9 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($options->parseOptions(true));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage referenceid is not set or empty
-     */
     public function testParseOptionsWithInvalidReferenceID() {
+        $this->expectExceptionMessage("referenceid is not set or empty");
+        $this->expectException(\InvalidArgumentException::class);
         $options = $this->validoptions;
         unset($options['referenceid']);
 
@@ -45,11 +44,9 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
         $options->parseOptions(true);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage at least one of customername or customeremailaddress is not set or empty
-     */
     public function testParseOptionsWithInvalidCustomerNameAndEmailAddress() {
+        $this->expectExceptionMessage("at least one of customername or customeremailaddress is not set or empty");
+        $this->expectException(\InvalidArgumentException::class);
         $options = $this->validoptions;
         unset($options['customername']);
         unset($options['customeremailaddress']);
@@ -58,11 +55,9 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
         $options->parseOptions(true);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage languagecode is not set or empty
-     */
     public function testParseOptionsWithInvalidLanguageCode() {
+        $this->expectExceptionMessage("languagecode is not set or empty");
+        $this->expectException(\InvalidArgumentException::class);
         $options = $this->validoptions;
         unset($options['languagecode']);
 
@@ -70,11 +65,9 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
         $options->parseOptions(true);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage downloadlimit is not set or not an integer
-     */
     public function testParseOptionsWithInvalidDownloadLimit() {
+        $this->expectExceptionMessage("downloadlimit is not set or not an integer");
+        $this->expectException(\InvalidArgumentException::class);
         $options = $this->validoptions;
         $options['downloadlimit'] = 'str';
 
@@ -82,11 +75,9 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
         $options->parseOptions(true);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage expirydays is not set or not an integer
-     */
     public function testParseOptionsWithInvalidExpiryDays() {
+        $this->expectExceptionMessage("expirydays is not set or not an integer");
+        $this->expectException(\InvalidArgumentException::class);
         $options = $this->validoptions;
         $options['expirydays'] = 'str';
 
@@ -94,11 +85,9 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
         $options->parseOptions(true);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage epub is not set or not a boolean
-     */
     public function testParseOptionsWithInvalidEpub() {
+        $this->expectExceptionMessage("epub is not set or not a boolean");
+        $this->expectException(\InvalidArgumentException::class);
         $options = $this->validoptions;
         $options['epub'] = 'str';
 
@@ -106,11 +95,9 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
         $options->parseOptions(true);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage kf8mobi is not set or not a boolean
-     */
     public function testParseOptionsWithInvalidKF8Mobi() {
+        $this->expectExceptionMessage("kf8mobi is not set or not a boolean");
+        $this->expectException(\InvalidArgumentException::class);
         $options = $this->validoptions;
         $options['kf8mobi'] = 'str';
 
