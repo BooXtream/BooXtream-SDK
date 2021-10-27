@@ -14,7 +14,7 @@ BooXtreamClient is available in Packagist, just add it to your composer.json
 ```javascript
 {
     "require": {
-        "icontact/booxtreamclient": "~1.0"
+        "icontact/booxtreamclient": "~2.0"
     }
 }
 ```
