@@ -27,39 +27,44 @@ class BooXtreamClient implements BooXtreamClientInterface
      * @var ClientInterface
      */
     private $guzzle;
+
     /**
      * @var array
      */
     private $authentication;
+
     /**
      * @var string
      */
     private $type;
+
     /**
      * @var Options
      */
     private $options;
+
     /**
      * @var array
      */
     private $files;
+
     /**
      * @var array
      */
     private $storedfiles;
 
     /**
-     * @param string $type
-     * @param Options $options
-     * @param array $authentication
-     * @param ClientInterface $guzzle
+     * @param  string  $type
+     * @param  Options  $options
+     * @param  array  $authentication
+     * @param  ClientInterface  $guzzle
      *
      * return void
      */
     public function __construct($type, Options $options, array $authentication, ClientInterface $guzzle)
     {
-        if ( ! in_array($type, $this->types)) {
-            throw new \InvalidArgumentException('invalid type ' . $type);
+        if (! in_array($type, $this->types)) {
+            throw new \InvalidArgumentException('invalid type '.$type);
         }
 
         $this->type    = $type;
@@ -73,7 +78,7 @@ class BooXtreamClient implements BooXtreamClientInterface
     }
 
     /**
-     * @param string $file
+     * @param  string  $file
      *
      * return bool
      */
@@ -88,7 +93,24 @@ class BooXtreamClient implements BooXtreamClientInterface
     }
 
     /**
-     * @param string $file
+     * @param  string  $file
+     * @return array
+     */
+    private function checkFile($name, $file)
+    {
+        if (! file_exists($file) || ! is_readable($file)) {
+            throw new \InvalidArgumentException('file '.$file.' not found or readable while setting '.$name);
+        }
+
+        return [
+            'name'     => $name,
+            'filename' => basename($file),
+            'contents' => fopen($file, 'r'),
+        ];
+    }
+
+    /**
+     * @param  string  $file
      *
      * return bool
      */
@@ -103,26 +125,7 @@ class BooXtreamClient implements BooXtreamClientInterface
     }
 
     /**
-     * @param string $file
-     *
-     * @return array
-     */
-    private function checkFile($name, $file)
-    {
-        if ( ! file_exists($file) || ! is_readable($file)) {
-            throw new \InvalidArgumentException('file ' . $file . ' not found or readable while setting ' . $name);
-        }
-
-        return [
-            'name'     => $name,
-            'filename' => basename($file),
-            'contents' => fopen($file, 'r'),
-        ];
-    }
-
-    /**
-     * @param string $storedfile
-     *
+     * @param  string  $storedfile
      * @return bool
      */
     public function setStoredEpubFile($storedfile)
@@ -142,8 +145,35 @@ class BooXtreamClient implements BooXtreamClientInterface
     }
 
     /**
-     * @param string $storedfile
-     *
+     * @param  string  $storedfile
+     * @return string
+     */
+    private function checkStoredFile($storedfile)
+    {
+        try {
+            // check if stored file exists
+            $this->guzzle->request(
+                'GET',
+                self::BASE_URL.'/storedfiles/'.$storedfile,
+                [
+                    'auth'  => $this->authentication,
+                    'query' => [
+                        'exists' => '',
+                    ],
+                ]
+            );
+        } catch (ClientException $e) {
+            if ($e->getCode() === 404) {
+                throw new \InvalidArgumentException('storedfile '.$storedfile.' does not exist');
+            }
+            throw $e;
+        }
+
+        return $storedfile;
+    }
+
+    /**
+     * @param  string  $storedfile
      * @return bool
      */
     public function setStoredExlibrisFile($storedfile)
@@ -162,16 +192,16 @@ class BooXtreamClient implements BooXtreamClientInterface
      */
     public function send()
     {
-        if ( ! isset($this->storedfiles['epubfile']) && ! isset($this->files['epubfile'])) {
+        if (! isset($this->storedfiles['epubfile']) && ! isset($this->files['epubfile'])) {
             throw new \RuntimeException('storedfile or epubfile not set');
         }
 
         $multipart = $this->getMultipart();
 
         // set action
-        $action = self::BASE_URL . '/booxtream.' . $this->type;
+        $action = self::BASE_URL.'/booxtream.'.$this->type;
         if (isset($this->storedfiles['epubfile'])) {
-            $action = self::BASE_URL . '/storedfiles/' . $this->storedfiles['epubfile'] . '.' . $this->type;
+            $action = self::BASE_URL.'/storedfiles/'.$this->storedfiles['epubfile'].'.'.$this->type;
         }
 
         return $this->guzzle->request(
@@ -182,35 +212,6 @@ class BooXtreamClient implements BooXtreamClientInterface
                 'multipart' => $multipart,
             ]
         );
-
-    }
-
-    /**
-     * @param string $storedfile
-     *
-     * @return string
-     */
-    private function checkStoredFile($storedfile)
-    {
-        try {
-            // check if stored file exists
-            $this->guzzle->request(
-                'GET',
-                self::BASE_URL . '/storedfiles/' . $storedfile,
-                [
-                    'auth'  => $this->authentication,
-                    'query' => [
-                        'exists' => '',
-                    ],
-                ]
-            );
-        } catch (ClientException $e) {
-            if ($e->getCode() === 404) {
-                throw new \InvalidArgumentException('storedfile ' . $storedfile . ' does not exist');
-            }
-            throw $e;
-        }
-        return $storedfile;
     }
 
     /**

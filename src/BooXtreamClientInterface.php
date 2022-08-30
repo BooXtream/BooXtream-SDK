@@ -12,23 +12,21 @@ use GuzzleHttp\Psr7\Response;
 interface BooXtreamClientInterface
 {
     /**
-     * @param string $type
-     * @param Options $options
-     * @param array $authentication
-     * @param ClientInterface $guzzle
+     * @param  string  $type
+     * @param  Options  $options
+     * @param  array  $authentication
+     * @param  ClientInterface  $guzzle
      */
     public function __construct($type, Options $options, array $authentication, ClientInterface $guzzle);
 
     /**
-     * @param string $storedfile
-     *
+     * @param  string  $storedfile
      * @return bool
      */
     public function setStoredEpubFile($storedfile);
 
     /**
-     * @param string $storedfile
-     *
+     * @param  string  $storedfile
      * @return bool
      */
     public function setStoredExlibrisFile($storedfile);
