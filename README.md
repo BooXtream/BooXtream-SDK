@@ -45,15 +45,15 @@ use \GuzzleHttp\Client;
 $guzzle = new Client();
 
 // an options object, refer to the documentation for more information on the options
-$options = new Options[
+$options = new Options([
     'customername' => 'Foo Bar',
     'referenceid' => 'bazdibzimgir12345',
     'languagecode' => 1033
-]
+]);
 
 // create the BooXtream Client
 $type = 'xml'; // returns downloadlinks
-$credentials = ['username', 'apikey'] // you will need a username and an API key
+$credentials = ['username', 'apikey']; // you will need a username and an API key
 $BooXtream = new BooXtreamClient($type, $options, $credentials, $guzzle);
 ```
 
