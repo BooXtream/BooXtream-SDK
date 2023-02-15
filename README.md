@@ -11,6 +11,12 @@ A client class in PHP for use with the BooXtream webservice.
 
 BooXtreamClient is available in Packagist, just add it to your composer.json
 
+```
+composer require icontact/booxtreamclient
+```
+
+or
+
 ```javascript
 {
     "require": {
