@@ -4,7 +4,7 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the package uses
 [Semantic Versioning](https://semver.org). Releases are git tags (`vX.Y.Z`).
 
-## [Unreleased] - 3.0.0
+## [3.0.0] - 2026-11-24
 
 Breaking release. Requires PHP 8.3+ and Guzzle 7.15.2+ or 8.6+, and adds native parameter and return types (`declare(strict_types=1)`).
 
