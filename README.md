@@ -13,7 +13,7 @@ A client class in PHP for use with the BooXtream webservice.
 composer require icontact/booxtreamclient
 ```
 
-Requires PHP 8.3 and up and [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
+Requires PHP 8.3 and up and [Guzzle](https://docs.guzzlephp.org/) 8.
 
 ### Versioning
 

@@ -6,13 +6,14 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased] - 3.0.0
 
-Breaking release. Requires PHP 8.3+ and Guzzle 7.15.2+ (security fixes in Guzzle and guzzlehttp/psr7), and adds native parameter and return types (`declare(strict_types=1)`).
+Breaking release. Requires PHP 8.3+ and Guzzle 8.6+, and adds native parameter and return types (`declare(strict_types=1)`).
 
 ### Added
 - PDF support. The service picks EPUB or PDF from the file extension; for a PDF, `send()` fills in
   `expirydays` (30) and `downloadlimit` (3) when not given, because the core API requires both for every PDF.
 
 ### Changed
+- Requires Guzzle 8 (was 7). A Guzzle client passed in with a hand-built handler stack needs `GuzzleHttp\Middleware::auth()` in that stack, because Guzzle 8 applies the `auth` option there; `HandlerStack::create()` and the default client already include it.
 - Format-neutral API: `setEpubFile()` is `setFile()`, `setStoredEpubFile()` is `setStoredFile()`, and the `epub` type is `direct`.
 - All setters take a `string` and, like `Options::parseOptions()`, return `void`; failures throw. `send()` returns `Psr\Http\Message\ResponseInterface`.
 - `BooXtreamClientInterface` no longer declares the constructor.
