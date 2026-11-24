@@ -1,41 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Icontact\BooXtreamClient\Tests;
 
 use Icontact\BooXtreamClient\Options;
 use PHPUnit\Framework\TestCase;
 
-class OptionsTest extends TestCase
+final class OptionsTest extends TestCase
 {
-    protected $validoptions = [
+    private array $validoptions = [
         'referenceid'          => 'str',
         'customername'         => 'str',
         'customeremailaddress' => 'str',
         'languagecode'         => 1,
         'downloadlimit'        => 1,
         'expirydays'           => 1,
-        'epub'                 => true,
-        'kf8mobi'              => true,
     ];
 
-    public function testObject()
-    {
-        $this->assertInstanceOf('\Icontact\BooXtreamClient\Options', new Options([]));
-    }
-
-    public function testParseOptionsWithoutXMLType()
+    public function testParseOptionsWithoutXMLType(): void
     {
         $options = new Options($this->validoptions);
-        $this->assertTrue($options->parseOptions(false));
+        $this->expectNotToPerformAssertions();
+        $options->parseOptions(false);
     }
 
-    public function testParseOptionsWithXMLType()
+    public function testParseOptionsWithXMLType(): void
     {
         $options = new Options($this->validoptions);
-        $this->assertTrue($options->parseOptions(true));
+        $this->expectNotToPerformAssertions();
+        $options->parseOptions(true);
     }
 
-    public function testParseOptionsWithInvalidReferenceID()
+    public function testParseOptionsWithInvalidReferenceID(): void
     {
         $this->expectExceptionMessage('referenceid is not set or empty');
         $this->expectException(\InvalidArgumentException::class);
@@ -46,7 +43,7 @@ class OptionsTest extends TestCase
         $options->parseOptions(true);
     }
 
-    public function testParseOptionsWithInvalidCustomerNameAndEmailAddress()
+    public function testParseOptionsWithInvalidCustomerNameAndEmailAddress(): void
     {
         $this->expectExceptionMessage('at least one of customername or customeremailaddress is not set or empty');
         $this->expectException(\InvalidArgumentException::class);
@@ -58,7 +55,7 @@ class OptionsTest extends TestCase
         $options->parseOptions(true);
     }
 
-    public function testParseOptionsWithInvalidLanguageCode()
+    public function testParseOptionsWithInvalidLanguageCode(): void
     {
         $this->expectExceptionMessage('languagecode is not set or empty');
         $this->expectException(\InvalidArgumentException::class);
@@ -69,7 +66,7 @@ class OptionsTest extends TestCase
         $options->parseOptions(true);
     }
 
-    public function testParseOptionsWithInvalidDownloadLimit()
+    public function testParseOptionsWithInvalidDownloadLimit(): void
     {
         $this->expectExceptionMessage('downloadlimit is not set or not an integer');
         $this->expectException(\InvalidArgumentException::class);
@@ -80,7 +77,7 @@ class OptionsTest extends TestCase
         $options->parseOptions(true);
     }
 
-    public function testParseOptionsWithInvalidExpiryDays()
+    public function testParseOptionsWithInvalidExpiryDays(): void
     {
         $this->expectExceptionMessage('expirydays is not set or not an integer');
         $this->expectException(\InvalidArgumentException::class);
@@ -91,29 +88,25 @@ class OptionsTest extends TestCase
         $options->parseOptions(true);
     }
 
-    public function testParseOptionsWithInvalidEpub()
+    public function testXmlDefaultsFillGapsButNeverOverrideGivenValues(): void
     {
-        $this->expectExceptionMessage('epub is not set or not a boolean');
-        $this->expectException(\InvalidArgumentException::class);
-        $options         = $this->validoptions;
-        $options['epub'] = 'str';
-
-        $options = new Options($options);
+        $given = $this->validoptions;
+        unset($given['expirydays']);
+        $options = new Options(['downloadlimit' => 1] + $given);
         $options->parseOptions(true);
+        $sent = array_column($options->getMultipartArray(), 'contents', 'name');
+        $this->assertSame('1', $sent['downloadlimit']);
+        $this->assertSame('30', $sent['expirydays']);
     }
 
-    public function testParseOptionsWithInvalidKF8Mobi()
+    public function testEpubOptionIsNotSent(): void
     {
-        $this->expectExceptionMessage('kf8mobi is not set or not a boolean');
-        $this->expectException(\InvalidArgumentException::class);
-        $options            = $this->validoptions;
-        $options['kf8mobi'] = 'str';
-
-        $options = new Options($options);
+        $options = new Options($this->validoptions);
         $options->parseOptions(true);
+        $this->assertNotContains('epub', array_column($options->getMultipartArray(), 'name'));
     }
 
-    public function testGetMultipartArray()
+    public function testGetMultipartArray(): void
     {
         $options = new Options($this->validoptions);
         $this->assertNotCount(0, $options->getMultipartArray());

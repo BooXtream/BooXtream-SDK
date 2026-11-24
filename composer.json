@@ -1,13 +1,13 @@
 {
   "name": "icontact/booxtreamclient",
   "description": "A simple example client for the BooXtream webservice",
-  "homepage": "https://github.com/BooXtream/php-BooXtreamClient/",
+  "homepage": "https://github.com/BooXtream/BooXtream-SDK",
   "require": {
-    "php": ">=7.2.5",
-    "guzzlehttp/guzzle": "^7.5"
+    "php": "^8.3",
+    "guzzlehttp/guzzle": "^7.9"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5.24",
+    "phpunit/phpunit": "^12.0",
     "roave/security-advisories": "dev-latest"
   },
   "license": "MIT",
@@ -26,5 +26,8 @@
     "psr-4": {
       "Icontact\\BooXtreamClient\\Tests\\": "tests/"
     }
+  },
+  "scripts": {
+    "test": "phpunit"
   }
 }

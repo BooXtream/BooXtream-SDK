@@ -4,7 +4,7 @@
  * Example for usage with stored files
  */
 
-require '../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 use GuzzleHttp\Client;
 use Icontact\BooXtreamClient\BooXtreamClient;
@@ -41,7 +41,7 @@ try {
     $BooXtream = new BooXtreamClient($type, $Options, $credentials, $Guzzle);
 
     // set the stored file
-    $BooXtream->setStoredEpubFile($storedfile);
+    $BooXtream->setStoredFile($storedfile);
 
     // It's also possible to set a stored exlibris file
     $BooXtream->setStoredExlibrisFile($storedexlibrisfile);

@@ -1,140 +1,65 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Icontact\BooXtreamClient;
 
-/**
- * Class Options
- */
 class Options
 {
-    /**
-     * @var array
-     */
-    private $defaultoptions = [
+    private const DEFAULTS = [
         'exlibris'      => false,
         'chapterfooter' => false,
         'disclaimer'    => false,
         'showdate'      => false,
     ];
 
-    /**
-     * @var array
-     */
-    private $options;
+    private const XML_DEFAULTS = [
+        'expirydays'    => 30,
+        'downloadlimit' => 3,
+    ];
+
+    /** @var array<string, mixed> */
+    private array $options;
 
     /**
-     * Options constructor.
-     *
-     * @param  array  $options
+     * @param  array<string, mixed>  $options
      */
     public function __construct(array $options)
     {
-        $this->options = array_replace_recursive($this->defaultoptions, $options);
+        $this->options = array_replace(self::DEFAULTS, $options);
     }
 
-    /**
-     * @param $xml
-     * @return bool
-     */
-    public function parseOptions($xml)
+    public function parseOptions(bool $linkDefaults): void
     {
-        try {
-            // Required stuff
-            $this->checkRequiredOptions();
-
-            // Check additional options for XML requests
-            if ($xml) {
-                $this->options = array_replace_recursive(
-                    [
-                        'expirydays'    => 30,
-                        'downloadlimit' => 3,
-                        'epub'          => true,
-                        'kf8mobi'       => false,
-                    ],
-                    $this->options
-                );
-                $this->checkXMLOptions();
-            }
-        } catch (\InvalidArgumentException $e) {
-            throw $e;
-        }
-
-        return true;
-    }
-
-    /**
-     * @return void
-     */
-    private function checkRequiredOptions()
-    {
-        if (! $this->checkString('customername') && ! $this->checkString('customeremailaddress')) {
+        if (empty($this->options['customername']) && empty($this->options['customeremailaddress'])) {
             throw new \InvalidArgumentException('at least one of customername or customeremailaddress is not set or empty');
         }
-        if (! $this->checkString('referenceid')) {
+        if (empty($this->options['referenceid'])) {
             throw new \InvalidArgumentException('referenceid is not set or empty');
         }
-        if (! $this->checkString('languagecode')) {
+        if (empty($this->options['languagecode'])) {
             throw new \InvalidArgumentException('languagecode is not set or empty');
         }
-    }
 
-    /**
-     * @param  string  $name
-     * @return bool
-     */
-    private function checkString($name)
-    {
-        return isset($this->options[$name]) && ! empty($this->options[$name]);
-    }
+        if ($linkDefaults) {
+            $this->options = array_replace(self::XML_DEFAULTS, $this->options);
 
-    /**
-     * @return void
-     */
-    private function checkXMLOptions()
-    {
-        if (! $this->checkInt('expirydays')) {
-            throw new \InvalidArgumentException('expirydays is not set or not an integer');
-        }
-        if (! $this->checkInt('downloadlimit')) {
-            throw new \InvalidArgumentException('downloadlimit is not set or not an integer');
-        }
-        if (! $this->checkBool('epub')) {
-            throw new \InvalidArgumentException('epub is not set or not a boolean');
-        }
-        if (! $this->checkBool('kf8mobi')) {
-            throw new \InvalidArgumentException('kf8mobi is not set or not a boolean');
+            foreach (['expirydays', 'downloadlimit'] as $name) {
+                if (! is_int($this->options[$name])) {
+                    throw new \InvalidArgumentException($name.' is not set or not an integer');
+                }
+            }
         }
     }
 
     /**
-     * @param  string  $name
-     * @return bool
+     * @return list<array{name: string, contents: string}>
      */
-    private function checkInt($name)
-    {
-        return isset($this->options[$name]) && is_int($this->options[$name]);
-    }
-
-    /**
-     * @param  string  $name
-     * @return bool
-     */
-    private function checkBool($name)
-    {
-        return isset($this->options[$name]) && is_bool($this->options[$name]);
-    }
-
-    /**
-     * @return array
-     */
-    public function getMultipartArray()
+    public function getMultipartArray(): array
     {
         $multipart = [];
         foreach ($this->options as $name => $contents) {
-            $multipart[] = [
-                'name'     => $name,
-                'contents' => (string) $contents,
-            ];
+            $multipart[] = ['name' => $name, 'contents' => (string) $contents];
         }
 
         return $multipart;
