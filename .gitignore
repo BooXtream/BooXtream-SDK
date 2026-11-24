@@ -1,3 +1,5 @@
 vendor
 .idea
 examples/test.php
+.phpunit.result.cache
+composer.lock
