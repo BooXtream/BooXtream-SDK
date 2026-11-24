@@ -190,6 +190,20 @@ final class BooXtreamClientTest extends TestCase
         $this->assertSame('/storedfiles/map/sub/boek.epub', $this->history[1]['request']->getUri()->getPath());
     }
 
+    /** @return list<array{string}> */
+    public static function dotSegmentNames(): array
+    {
+        return [['../booxtream'], ['map/../../x'], ['./boek'], ['map//boek']];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('dotSegmentNames')]
+    public function testStoredFileWithDotOrEmptySegmentIsRejected(string $name): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('storedfile name contains an empty, "." or ".." segment');
+        $this->client(200)->setStoredFile($name);
+    }
+
     public function testEmptyStoredFileIsRejected(): void
     {
         $this->expectException(\InvalidArgumentException::class);

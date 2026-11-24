@@ -16,7 +16,7 @@ Breaking release. Requires PHP 8.3+ and adds native parameter and return types (
 - Format-neutral API: `setEpubFile()` is `setFile()`, `setStoredEpubFile()` is `setStoredFile()`, and the `epub` type is `direct`.
 - All setters take a `string` and, like `Options::parseOptions()`, return `void`; failures throw. `send()` returns `Psr\Http\Message\ResponseInterface`.
 - `BooXtreamClientInterface` no longer declares the constructor.
-- Stored file names are URL-encoded per path segment, and an empty name throws an `InvalidArgumentException`.
+- Stored file names are URL-encoded per path segment, and an empty name or one with an empty, `.` or `..` path segment throws an `InvalidArgumentException`.
 - `setStoredFile()` only strips a trailing `.epub` (`book.epub.v2` is no longer cut to `book`).
 - The not-found `InvalidArgumentException` from a stored-file check carries the Guzzle exception as `getPrevious()`.
 

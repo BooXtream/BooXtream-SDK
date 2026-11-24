@@ -120,6 +120,9 @@ class BooXtreamClient implements BooXtreamClientInterface
         if ($storedfile === '') {
             throw new \InvalidArgumentException('storedfile name is empty');
         }
+        if (array_intersect(explode('/', $storedfile), ['', '.', '..'])) {
+            throw new \InvalidArgumentException('storedfile name contains an empty, "." or ".." segment');
+        }
 
         try {
             $this->guzzle->request('GET', self::storedFileUrl($storedfile), [
