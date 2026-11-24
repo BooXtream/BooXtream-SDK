@@ -37,7 +37,7 @@ final class BooXtreamClientTest extends TestCase
         $stack = HandlerStack::create(new MockHandler(array_map(fn (int $s) => new Response($s), $statuses)));
         $stack->push(Middleware::history($this->history));
 
-        return new BooXtreamClient('direct', $options ?? $this->createStub(Options::class), [], new Client(['handler' => $stack]));
+        return new BooXtreamClient('direct', $options ?? $this->createStub(Options::class), ['user', 'key'], new Client(['handler' => $stack]));
     }
 
     public function testSetInvalidType(): void
@@ -161,6 +161,17 @@ final class BooXtreamClientTest extends TestCase
             'https://service.booxtream.com/storedfiles/My.Book.epub',
             (string) $this->history[1]['request']->getUri()
         );
+    }
+
+    public function testCredentialsAreSentWithEveryRequest(): void
+    {
+        $bx = $this->client(200, 200);
+        $bx->setStoredFile('test');
+        $bx->send();
+        $this->assertCount(2, $this->history);
+        foreach ($this->history as $transaction) {
+            $this->assertSame('Basic '.base64_encode('user:key'), $transaction['request']->getHeaderLine('Authorization'));
+        }
     }
 
     public function testStoredFileOnlyStripsTrailingEpubExtension(): void
