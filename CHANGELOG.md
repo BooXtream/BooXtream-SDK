@@ -25,6 +25,11 @@ Breaking release. Requires PHP 8.3+ and Guzzle 7.15.2+ or 8.6+, and adds native 
 - mobi: the `mobi` type throws an `InvalidArgumentException`. The BooXtream service no longer supports the `kf8mobi` option; requests that send it fail.
 - The `epub` option; the service always delivers the file in its own format.
 
+## [2.0.2] - 2026-11-24
+
+### Security
+- Requires Guzzle 7.15.2 or newer, which pulls in guzzlehttp/psr7 2.13 or newer, past the published Guzzle and psr7 advisories. No code changes; PHP 7.2.5 is still supported.
+
 ## Earlier releases
 
 2.0.1 and older are documented by their git tags only.
