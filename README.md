@@ -15,17 +15,9 @@ composer require icontact/booxtreamclient
 
 Requires PHP 8.3 and up and [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
 
-### Upgrading from 2.x
+### Versioning
 
-3.0 requires PHP 8.3+ and adds native parameter and return types (`declare(strict_types=1)`):
-- all setters take a `string` and, like `Options::parseOptions()`, return `void` (they throw on failure); `send()` returns `Psr\Http\Message\ResponseInterface`;
-- `BooXtreamClientInterface` no longer declares the constructor;
-- PDF support; the API is format-neutral: `setEpubFile()` is `setFile()`, `setStoredEpubFile()` is `setStoredFile()`, and the `epub` type is `direct`;
-- the `epub` option is gone; the service always delivers the file in its own format;
-- `setStoredFile()` only strips a trailing `.epub` (`book.epub.v2` is no longer cut to `book`);
-- mobi is no longer supported: the `mobi` type throws an `InvalidArgumentException`;
-- the BooXtream service no longer supports the `kf8mobi` option; requests that send it fail;
-- the not-found `InvalidArgumentException` from a stored-file check now carries the Guzzle exception as `getPrevious()`.
+This package follows [Semantic Versioning](https://semver.org). Releases are git tags (`vX.Y.Z`); see [CHANGELOG.md](CHANGELOG.md) for what changed, including how to upgrade from 2.x.
 
 ### Usage
 
