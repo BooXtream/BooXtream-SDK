@@ -1,0 +1,26 @@
+name: tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.3', '8.4', '8.5']
+        deps: [highest]
+        include:
+          # the lowest allowed versions, so Guzzle 7 stays tested
+          - php: '8.3'
+            deps: lowest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - run: composer update --no-interaction --prefer-dist ${{ matrix.deps == 'lowest' && '--prefer-lowest' || '' }}
+      - run: vendor/bin/phpunit

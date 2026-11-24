@@ -3,42 +3,30 @@ BooXtreamClient
 
 A client class in PHP for use with the BooXtream webservice.
 
-- Has the ability to upload an epub file to the BooXtream webservice
-- Alternatively specify an epub file stored on the BooXtream storage servers
-- Can return an epub file, a (converted) mobi file or an xml containing one or more downloadlinks
+- Watermarks EPUB and PDF files; the service picks the format from the file extension
+- Upload a file, or specify a file stored on the BooXtream storage servers
+- Returns the watermarked file directly, or an xml containing a downloadlink
 
-### Installing via Composer
-
-BooXtreamClient is available in Packagist, just add it to your composer.json
+### Installing
 
 ```
 composer require icontact/booxtreamclient
 ```
 
-or
+Requires PHP 8.3 and up and [Guzzle](https://docs.guzzlephp.org/) 7.15.2+ or 8.6+.
 
-```javascript
-{
-    "require": {
-        "icontact/booxtreamclient": "~2.0"
-    }
-}
-```
+### Versioning
 
-Alternatively you can just download the package and run ```composer install``` to get the requirements.
-
-The only requirements at the moment are PHP 7.2.5 and up and [Guzzle](http://guzzle.readthedocs.org/en/latest/index.html).
-
-If you do not wish to use Composer you will need to fulfill the dependencies on your own.
+This package follows [Semantic Versioning](https://semver.org). Releases are git tags (`vX.Y.Z`); see [CHANGELOG.md](CHANGELOG.md) for what changed, including how to upgrade from 2.x.
 
 ### Usage
 
 You will need:
 - a username and API key for the service
 - an array of options (refer to the BooXtream web service API documentation)
-- an epub file or a file stored on the BooXtream service
+- an EPUB or PDF file, or a file stored on the BooXtream service
 
-The type parameter can be either 'epub', 'mobi' or 'xml'. In the first two cases a file will be returned by the service, in the case of 'xml' you will receive one or two downloadlinks, depending on your settings (aka delivery platform).
+The type parameter can be either 'direct' or 'xml'. With 'direct' the watermarked file is returned by the service, with 'xml' you will receive a downloadlink (aka delivery platform).
 
 ```php
 require('vendor/autoload.php');
@@ -66,17 +54,17 @@ $BooXtream = new BooXtreamClient($type, $options, $credentials, $guzzle);
 We're now going to send the request.
 
 ```php
-// add a file location to the epub file you want to watermark
-$BooXtream->setEpubFile('/path/to/your/file.epub');
+// add a file location to the EPUB or PDF file you want to watermark
+$BooXtream->setFile('/path/to/your/file.epub');
 
 // and send
 $Response = $BooXtream->send();
 ```
 
-A request with a stored file is slightly different. Instead of adding an epubfile you just need to provide the name of the file (with or without .epub extension):
+A request with a stored file is slightly different. Instead of adding a file you just need to provide the name of the file (an EPUB with or without .epub extension, a PDF with .pdf):
 
 ```php
-$BooXtream->setStoredEpubFile('filename');
+$BooXtream->setStoredFile('filename');
 ```
 
 ### Options
@@ -84,14 +72,13 @@ $BooXtream->setStoredEpubFile('filename');
 The available options are as follows. Refer to the API Documentation for details:
 
 #### required:
-- customername (string)
-- customeremailaddress (string)
+- customername and/or customeremailaddress (string), at least one
 - referenceid (string)
 - languagecode (int)
 
-#### additionaly required if using xml (aka delivery platform):
-- expirydays (int)
-- downloadlimit (int)
+#### used with xml (aka delivery platform) and with every PDF:
+- expirydays (int), default: 30
+- downloadlimit (int), default: 3
 
 #### optional:
 - exlibrisfont (string), this should contain either 'sans', 'serif' or 'script'
@@ -100,32 +87,33 @@ The available options are as follows. Refer to the API Documentation for details
 - disclaimer (bool), default: false
 - showdate (bool), default: false
 
-#### optional if using xml (aka delivery platform):
-- epub (bool), default: true
-- kf8mobi (bool), default: false
-
 #### custom ex libris
 It is also possible to set a custom ex libris file according to the specifications in the API Documentation.
 ```php
 $BooXtream->setExlibrisFile('filename');
 ```
 
+An ex libris stored on the BooXtream storage servers can be used as well. Pass it with its `.png` extension: the service adds `.epub` to a stored name without a known extension, so `logo` is looked up as `logo.epub`.
+```php
+$BooXtream->setStoredExlibrisFile('logo.png');
+```
+
 ### Response
 
 The BooXtreamClient returns an object of the type of [GuzzleHttp\Psr7\Response](https://docs.guzzlephp.org/en/latest/index.html)
 
-The response always contains a statuscode (```$Response->getStatusCode();```). If the request was successful this will be 200. Any other status code is an error and will throw an Exception of the type of *GuzzleHttp\Exception\ClientException*. You can retrieve a Response object as follows:
+The response always contains a statuscode (```$Response->getStatusCode();```). If the request was successful this will be 200. Any other status code is an error and will throw an Exception of the type of *GuzzleHttp\Exception\BadResponseException* (a *ClientException* for 4xx, a *ServerException* for 5xx). You can retrieve a Response object as follows:
 ```php
 try {
   $Response = $BooXtream->send();
-} catch (ClientException $e) {
+} catch (\GuzzleHttp\Exception\BadResponseException $e) {
   $Response = $e->getResponse();
 }
 ```
 Check the HTTP Reason (```$Response->getReasonPhrase();```) for more information.
 
-#### Epub/Mobi
-If you requested an epub or mobi file this can be accessed by reading the body (```$Response->getBody();```). The body is a stream, refer to the [PHP Documentation](http://php.net/stream) for more information on how to access it. Furthermore you can access the file's content-type with ```$Response->getHeader('content-type');```.
+#### Direct
+If you requested a direct download this can be accessed by reading the body (```$Response->getBody();```). The body is a stream, refer to the [PHP Documentation](http://php.net/stream) for more information on how to access it. Furthermore you can access the file's content-type with ```$Response->getHeader('content-type');```.
 
 #### XML or error
 If you requested xml (aka delivery platform) or if an error occurred more information can be found by accessing the body (```$Response->getBody();```). The body is a stream, refer to the [PHP Documentation](http://php.net/stream) for more information on how to access it.

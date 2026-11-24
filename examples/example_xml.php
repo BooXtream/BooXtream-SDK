@@ -4,7 +4,7 @@
  * Example for usage with distribution platform (xml with downloadlinks) and a custom exlibris
  */
 
-require '../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 use GuzzleHttp\Client;
 use Icontact\BooXtreamClient\BooXtreamClient;
@@ -14,10 +14,10 @@ use Icontact\BooXtreamClient\Options;
 $credentials = ['username', 'apikey'];
 
 // The epubfile you would like to upload
-$epubfile = 'assets/test.epub';
+$epubfile = __DIR__.'/assets/test.epub';
 
 // An optional exlibrisfile
-$exlibrisfile = 'assets/customexlibris.png';
+$exlibrisfile = __DIR__.'/assets/customexlibris.png';
 
 // set the options in an array
 $options = [
@@ -43,7 +43,7 @@ try {
     $BooXtream = new BooXtreamClient($type, $Options, $credentials, $Guzzle);
 
     // set the epubfile
-    $BooXtream->setEpubFile($epubfile);
+    $BooXtream->setFile($epubfile);
 
     // Add a custom exlibris
     $BooXtream->setExlibrisFile($exlibrisfile);

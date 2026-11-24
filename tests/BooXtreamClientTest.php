@@ -1,270 +1,312 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Icontact\BooXtreamClient\Tests;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Icontact\BooXtreamClient\BooXtreamClient;
+use Icontact\BooXtreamClient\Options;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 
-class BooXtreamClientTest extends TestCase
+final class BooXtreamClientTest extends TestCase
 {
-    protected $mocks = [];
+    private const EPUB = __DIR__.'/../examples/assets/test.epub';
 
-    protected $basicobject;
+    private const PDF = __DIR__.'/../examples/assets/test.pdf';
 
-    public function testObject()
+    private const EXLIBRIS = __DIR__.'/../examples/assets/customexlibris.png';
+
+    /** @var list<array{request: \Psr\Http\Message\RequestInterface}> */
+    private array $history = [];
+
+    private function client(int ...$statuses): BooXtreamClient
     {
-        $this->assertInstanceOf('\Icontact\BooXtreamClient\BooXtreamClient', $this->basicobject);
+        return $this->clientWith(null, ...$statuses);
     }
 
-    public function testSetInvalidType()
+    private function clientWith(?Options $options, int ...$statuses): BooXtreamClient
+    {
+        $stack = HandlerStack::create(new MockHandler(array_map(fn (int $s) => new Response($s), $statuses)));
+        $stack->push(Middleware::history($this->history));
+
+        return new BooXtreamClient('direct', $options ?? $this->createStub(Options::class), ['user', 'key'], new Client(['handler' => $stack]));
+    }
+
+    public function testSetInvalidType(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        new BooXtreamClient('bla', $this->mocks['options'], [], $this->mocks['guzzle']);
+        new BooXtreamClient('bla', $this->createStub(Options::class), [], $this->createStub(ClientInterface::class));
     }
 
-    public function testSetExistingEpubFile()
-    {
-        $this->assertTrue($this->basicobject->setEpubFile('./examples/assets/test.epub'));
-    }
-
-    public function testSetNonExistingEpubFile()
+    public function testEpubTypeIsReplacedByDirect(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->basicobject->setEpubFile('../nope');
+        $this->expectExceptionMessage('invalid type epub');
+        new BooXtreamClient('epub', $this->createStub(Options::class), [], $this->createStub(ClientInterface::class));
     }
 
-    public function testSetExistingExlibrisFile()
-    {
-        $this->assertTrue($this->basicobject->setExlibrisFile('./examples/assets/customexlibris.png'));
-    }
-
-    public function testSetNonExistingExlibrisFile()
+    public function testMobiTypeIsRejected(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->basicobject->setExlibrisFile('../nope');
+        $this->expectExceptionMessage('invalid type mobi');
+        new BooXtreamClient('mobi', $this->createStub(Options::class), [], $this->createStub(ClientInterface::class));
     }
 
-    public function testSetExistingStoredEpubFile()
+    public function testSetExistingFile(): void
     {
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $this->assertTrue($bx->setStoredEpubFile('test.epub'));
+        $this->expectNotToPerformAssertions();
+        $this->client()->setFile(self::EPUB);
     }
 
-    public function testSetNonExistingStoredEpubFile()
+    public function testSetNonExistingFile(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $mock = new MockHandler([
-            new Response(404),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setStoredEpubFile('test');
+        $this->client()->setFile('../nope');
     }
 
-    public function testSetExistingStoredExlibrisFile()
+    public function testSetExistingExlibrisFile(): void
     {
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $this->assertTrue($bx->setStoredExlibrisFile('test'));
+        $this->expectNotToPerformAssertions();
+        $this->client()->setExlibrisFile(self::EXLIBRIS);
     }
 
-    public function testSetNonExistingStoredExlibrisFile()
+    public function testSetNonExistingExlibrisFile(): void
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->client()->setExlibrisFile('../nope');
+    }
+
+    public function testSetExistingStoredFile(): void
+    {
+        $this->client(200)->setStoredFile('test.epub');
+        $this->assertSame('/storedfiles/test', $this->history[0]['request']->getUri()->getPath());
+    }
+
+    public function testSetNonExistingStoredFile(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('storedfile test does not exist');
+        $this->client(404)->setStoredFile('test');
+    }
+
+    public function testSetExistingStoredExlibrisFile(): void
+    {
+        $this->client(200)->setStoredExlibrisFile('test.png');
+        $this->assertSame('/storedfiles/test.png', $this->history[0]['request']->getUri()->getPath());
+    }
+
+    public function testSetNonExistingStoredExlibrisFile(): void
+    {
         $this->expectException(\InvalidArgumentException::class);
-        $mock = new MockHandler([
-            new Response(404),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setStoredEpubFile('test');
+        $this->expectExceptionMessage('storedfile test does not exist');
+        $this->client(404)->setStoredExlibrisFile('test');
     }
 
-    public function testSetStoredEpubFileWithUnexpectedResponse()
+    public function testSetStoredFileWithUnexpectedResponse(): void
     {
-        $this->expectException(\GuzzleHttp\Exception\ClientException::class);
-        $mock = new MockHandler([
-            new Response(401),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setStoredEpubFile('test');
+        $this->expectException(ClientException::class);
+        $this->client(401)->setStoredFile('test');
     }
 
-    public function testSetEpubFileThenStoredEpubFile()
+    public function testSetFileThenStoredFile(): void
     {
-        $this->expectExceptionMessage('epubfile set but also trying to set storedfile');
         $this->expectException(\RuntimeException::class);
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-
-        $bx->setEpubFile('./examples/assets/test.epub');
-        $bx->setStoredEpubFile('test.epub');
+        $this->expectExceptionMessage('local file set but also trying to set stored file');
+        $bx = $this->client(200);
+        $bx->setFile(self::EPUB);
+        $bx->setStoredFile('test.epub');
     }
 
-    public function testSetStoredEpubFileThenEpubFile()
+    public function testSetStoredFileThenFile(): void
     {
-        $this->expectExceptionMessage('stored epubfile set but also trying to set local epubfile');
         $this->expectException(\RuntimeException::class);
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-
-        $bx->setStoredEpubFile('test.epub');
-        $bx->setEpubFile('./examples/assets/test.epub');
+        $this->expectExceptionMessage('stored file set but also trying to set local file');
+        $bx = $this->client(200);
+        $bx->setStoredFile('test.epub');
+        $bx->setFile(self::EPUB);
     }
 
-    public function testSetStoredExlibrisFileThenExlibrisFile()
+    public function testSetStoredExlibrisFileThenExlibrisFile(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('stored exlibrisfile set but also trying to set local exlibrisfile');
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-
+        $bx = $this->client(200);
         $bx->setStoredExlibrisFile('test');
-        $bx->setExlibrisFile('./examples/assets/customexlibris.png');
+        $bx->setExlibrisFile(self::EXLIBRIS);
     }
 
-    public function testSetExlibrisFileThenStoredExlibrisFile()
+    public function testSetExlibrisFileThenStoredExlibrisFile(): void
     {
+        $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('exlibrisfile set but also trying to set storedfile');
-        $this->expectException(\RuntimeException::class);
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-
-        $bx->setExlibrisFile('./examples/assets/customexlibris.png');
+        $bx = $this->client(200);
+        $bx->setExlibrisFile(self::EXLIBRIS);
         $bx->setStoredExlibrisFile('test');
     }
 
-    public function testIncorrectCredentials()
+    public function testSendRequestWithStoredFile(): void
     {
-        $this->expectException(\GuzzleHttp\Exception\ClientException::class);
-        $mock = new MockHandler([
-            new Response(401),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setStoredEpubFile('test');
+        $bx = $this->client(200, 200);
+        $bx->setStoredFile('My.Book.EPUB');
+        $this->assertInstanceOf(ResponseInterface::class, $bx->send());
+        $this->assertSame(
+            'https://service.booxtream.com/storedfiles/My.Book.epub',
+            (string) $this->history[1]['request']->getUri()
+        );
     }
 
-    public function testSendRequestWithStoredEpubFile()
+    public function testCredentialsAreSentWithEveryRequest(): void
     {
-        $mock = new MockHandler([
-            new Response(200),
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setStoredEpubFile('test.epub');
-        $this->assertInstanceOf('\Psr\Http\Message\ResponseInterface', $bx->send());
+        $bx = $this->client(200, 200);
+        $bx->setStoredFile('test');
+        $bx->send();
+        $this->assertCount(2, $this->history);
+        foreach ($this->history as $transaction) {
+            $this->assertSame('Basic '.base64_encode('user:key'), $transaction['request']->getHeaderLine('Authorization'));
+        }
     }
 
-    public function testSendRequestWithEpubFile()
+    public function testStoredFileOnlyStripsTrailingEpubExtension(): void
     {
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setEpubFile('./examples/assets/test.epub');
-        $this->assertInstanceOf('\Psr\Http\Message\ResponseInterface', $bx->send());
+        $this->client(200)->setStoredFile('book.epub.v2');
+        $this->assertSame(
+            'https://service.booxtream.com/storedfiles/book.epub.v2?exists=',
+            (string) $this->history[0]['request']->getUri()
+        );
     }
 
-    public function testSendRequestReturnOtherCode()
+    public function testStoredFileNameIsUrlEncoded(): void
     {
-        $this->expectException(\GuzzleHttp\Exception\ClientException::class);
-        $mock = new MockHandler([
-            new Response(200),
-            new Response(401),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setStoredEpubFile('test.epub');
+        $bx = $this->client(200, 200);
+        $bx->setStoredFile('boek#2.epub');
+        $bx->send();
+        $this->assertSame('/storedfiles/boek%232', $this->history[0]['request']->getUri()->getPath());
+        $this->assertSame('/storedfiles/boek%232.epub', $this->history[1]['request']->getUri()->getPath());
+    }
+
+    public function testStoredFileInSubfolderKeepsItsSlashes(): void
+    {
+        $bx = $this->client(200, 200);
+        $bx->setStoredFile('map/sub/boek.epub');
+        $bx->send();
+        $this->assertSame('/storedfiles/map/sub/boek', $this->history[0]['request']->getUri()->getPath());
+        $this->assertSame('/storedfiles/map/sub/boek.epub', $this->history[1]['request']->getUri()->getPath());
+    }
+
+    /** @return list<array{string}> */
+    public static function dotSegmentNames(): array
+    {
+        return [['../booxtream'], ['map/../../x'], ['./boek'], ['map//boek']];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('dotSegmentNames')]
+    public function testStoredFileWithDotOrEmptySegmentIsRejected(string $name): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('storedfile name contains an empty, "." or ".." segment');
+        $this->client(200)->setStoredFile($name);
+    }
+
+    public function testEmptyStoredFileIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('storedfile name is empty');
+        $this->client()->setStoredFile('.epub');
+    }
+
+    public function testEmptyStoredExlibrisFileIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('storedfile name is empty');
+        $this->client()->setStoredExlibrisFile('');
+    }
+
+    public function testSendRequestWithFile(): void
+    {
+        $bx = $this->client(200);
+        $bx->setFile(self::EPUB);
+        $this->assertInstanceOf(ResponseInterface::class, $bx->send());
+        $this->assertSame('https://service.booxtream.com/booxtream.epub', (string) $this->history[0]['request']->getUri());
+    }
+
+    /** @return array<string, string> multipart field name => value of the last request */
+    private function sentFields(): array
+    {
+        $body = (string) end($this->history)['request']->getBody();
+        preg_match_all('/name="([^"]+)"(?:; filename="[^"]*")?\r\n(?:[^\r\n]+\r\n)*\r\n(.*?)\r\n--/s', $body, $m);
+
+        return array_combine($m[1], $m[2]);
+    }
+
+    private function realOptions(): Options
+    {
+        return new Options(['customername' => 'x', 'referenceid' => '1', 'languagecode' => 1033]);
+    }
+
+    public function testDirectPdfGetsLinkDefaults(): void
+    {
+        $bx = $this->clientWith($this->realOptions(), 200);
+        $bx->setFile(self::PDF);
+        $bx->send();
+        $fields = $this->sentFields();
+        $this->assertSame('/booxtream.epub', end($this->history)['request']->getUri()->getPath());
+        $this->assertSame('30', $fields['expirydays'] ?? null);
+        $this->assertSame('3', $fields['downloadlimit'] ?? null);
+        $this->assertArrayHasKey('epubfile', $fields);
+    }
+
+    public function testDirectStoredPdfGetsLinkDefaults(): void
+    {
+        $bx = $this->clientWith($this->realOptions(), 200, 200);
+        $bx->setStoredFile('boek.pdf');
+        $bx->send();
+        $this->assertSame('/storedfiles/boek.pdf.epub', end($this->history)['request']->getUri()->getPath());
+        $this->assertSame('30', $this->sentFields()['expirydays'] ?? null);
+    }
+
+    public function testDirectEpubGetsNoLinkDefaults(): void
+    {
+        $bx = $this->clientWith($this->realOptions(), 200);
+        $bx->setFile(self::EPUB);
+        $bx->send();
+        $this->assertArrayNotHasKey('expirydays', $this->sentFields());
+    }
+
+    public function testSendRequestReturnOtherCode(): void
+    {
+        $this->expectException(ClientException::class);
+        $bx = $this->client(200, 401);
+        $bx->setStoredFile('test.epub');
         $bx->send();
     }
 
-    public function testSendRequestWithoutEpub()
+    public function testSendRequestWithoutFile(): void
     {
         $this->expectException(\RuntimeException::class);
-        $mock = new MockHandler([
-            new Response(200),
-            new Response(404),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->send();
+        $this->client()->send();
     }
 
-    public function testSendRequestWithStoredExlibrisFile()
+    public function testSendRequestWithStoredExlibrisFile(): void
     {
-        $mock = new MockHandler([
-            new Response(200),
-            new Response(200),
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setStoredEpubFile('test.epub');
+        $bx = $this->client(200, 200, 200);
+        $bx->setStoredFile('test.epub');
         $bx->setStoredExlibrisFile('exlibris.png');
-        $this->assertInstanceOf('\Psr\Http\Message\ResponseInterface', $bx->send());
+        $this->assertInstanceOf(ResponseInterface::class, $bx->send());
     }
 
-    public function testSendRequestWithExlibrisFile()
+    public function testSendRequestWithExlibrisFile(): void
     {
-        $mock = new MockHandler([
-            new Response(200),
-        ]);
-        $handler = HandlerStack::create($mock);
-        $guzzle  = new Client(['handler' => $handler]);
-        $bx      = new BooXtreamClient('epub', $this->mocks['options'], [], $guzzle);
-        $bx->setEpubFile('./examples/assets/test.epub');
-        $bx->setExlibrisFile('./examples/assets/customexlibris.png');
-        $this->assertInstanceOf('\Psr\Http\Message\ResponseInterface', $bx->send());
-    }
-
-    protected function setUp(): void
-    {
-        $this->mocks['guzzle']  = $this->createMock('GuzzleHttp\Client');
-        $this->mocks['options'] = $this->getMockBuilder('Icontact\BooXtreamClient\Options')
-                                       ->disableOriginalConstructor()
-                                       ->getMock();
-        $this->basicobject = new BooXtreamClient('epub', $this->mocks['options'], [], $this->mocks['guzzle']);
+        $bx = $this->client(200);
+        $bx->setFile(self::EPUB);
+        $bx->setExlibrisFile(self::EXLIBRIS);
+        $this->assertInstanceOf(ResponseInterface::class, $bx->send());
     }
 }
