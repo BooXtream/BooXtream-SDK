@@ -6,7 +6,7 @@ All notable changes to this package are documented here. The format follows
 
 ## [Unreleased] - 3.0.0
 
-Breaking release. Requires PHP 8.3+ and adds native parameter and return types (`declare(strict_types=1)`).
+Breaking release. Requires PHP 8.3+ and Guzzle 7.15.2+ (security fixes in Guzzle and guzzlehttp/psr7), and adds native parameter and return types (`declare(strict_types=1)`).
 
 ### Added
 - PDF support. The service picks EPUB or PDF from the file extension; for a PDF, `send()` fills in
